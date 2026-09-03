@@ -1,5 +1,6 @@
 node_modules/
 package-lock.json
+!examples/firstuser-agent/package-lock.json
 .env
 __pycache__/
 *.pyc

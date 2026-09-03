@@ -1,0 +1,9 @@
+firstuser-result.json
+screenshots/*.png
+screenshots/*/*.png
+!screenshots/example-run/*.png
+
+frontend/*.dc.html
+!frontend/FirstUser.dc.html
+frontend/.thumbnail
+frontend/uploads/

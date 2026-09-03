@@ -1,0 +1,164 @@
+{
+  "website": "https://reclaim.buildneststudio.com",
+  "persona": "Nigerian business owner",
+  "goal": "I have about ₦2M in failed payments per month.\n    Decide whether Reclaim is financially worth using.\n\n    Use only evidence available on the website.\n    Do not make up a recovery rate, expected recovery amount,\n    or any other financial assumption.\n\n    If the website does not provide enough information to calculate\n    whether Reclaim is financially worth using, identify exactly\n    what information is missing and stop.",
+  "journey": [
+    {
+      "step": 1,
+      "action": "click_link",
+      "target_index": 4,
+      "dom_index": 4,
+      "target_text": "Pricing",
+      "target_href": "https://reclaim.buildneststudio.com/#pricing",
+      "reason": "Pricing details are critical to judge financial worth. Jumping to the Pricing section should reveal fees or commission structure needed for ROI assessment.",
+      "url_after_action": "https://reclaim.buildneststudio.com/#pricing"
+    },
+    {
+      "step": 2,
+      "action": "click_link",
+      "target_index": 5,
+      "dom_index": 5,
+      "target_text": "FAQ",
+      "target_href": "https://reclaim.buildneststudio.com/#faq",
+      "reason": "To determine financial worth, I need expected outcomes like typical recovery rates or benchmarks. The FAQ is likely to address questions such as average recovery, fees nuances, or guarantees, which are essential to assess ROI for ₦2M failed payments/month.",
+      "url_after_action": "https://reclaim.buildneststudio.com/#faq"
+    },
+    {
+      "step": 3,
+      "action": "toggle_expandable",
+      "target_index": 2,
+      "dom_index": 3,
+      "target_text": "What happens if you don't recover anything?",
+      "target_href": null,
+      "reason": "Clarify downside risk and charges when there’s no recovery, which is essential to evaluate financial worth and resolve potential contradictions between plan pricing and the hero claim.",
+      "url_after_action": "https://reclaim.buildneststudio.com/#faq"
+    },
+    {
+      "step": 4,
+      "action": "click_link",
+      "target_index": 2,
+      "dom_index": 2,
+      "target_text": "How it works",
+      "target_href": "https://reclaim.buildneststudio.com/#how-it-works",
+      "reason": "To assess financial worth, I need evidence on expected recovery or performance benchmarks. The 'How it works' section is likely to explain outcomes, mechanisms, or provide metrics/case studies that inform potential recovery, which are essential for ROI assessment.",
+      "url_after_action": "https://reclaim.buildneststudio.com/#how-it-works"
+    }
+  ],
+  "evidence": [
+    {
+      "claim": "Reclaim connects to Paystack.",
+      "why_it_matters": "Confirms compatibility if the business uses Paystack, which is necessary before evaluating financial impact.",
+      "source": "Hero section",
+      "observed_at_step": 1
+    },
+    {
+      "claim": "Billed in ₦ (Naira).",
+      "why_it_matters": "Costs will be in local currency, removing FX uncertainty when assessing financial worth.",
+      "source": "Hero section",
+      "observed_at_step": 1
+    },
+    {
+      "claim": "Free until we recover something.",
+      "why_it_matters": "Indicates no upfront fees and that charges apply only upon successful recovery, which is crucial to evaluating financial risk/ROI.",
+      "source": "Hero section",
+      "observed_at_step": 1
+    },
+    {
+      "claim": "Targets failed mobile money, card, and bank transfer payments with SMS follow-up.",
+      "why_it_matters": "Shows the types of failed payments Reclaim attempts to recover, helping assess applicability to the business’s failed payments.",
+      "source": "Hero section",
+      "observed_at_step": 1
+    },
+    {
+      "claim": "Every plan pairs a flat platform fee with a share of what Reclaim actually recovers. If no revenue is recovered, you pay nothing beyond your plan.",
+      "why_it_matters": "Clarifies the cost structure and downside risk when evaluating financial worth.",
+      "source": "Pricing section",
+      "observed_at_step": 2
+    },
+    {
+      "claim": "Pay-on-Recovery plan: No flat fee; 25% of recovered amount only. Includes core retry + SMS follow-up and a recovery dashboard.",
+      "why_it_matters": "Provides a zero-upfront-cost option and the exact take rate to assess fees against any recovered revenue.",
+      "source": "Pricing section",
+      "observed_at_step": 2
+    },
+    {
+      "claim": "Starter plan: Approximately $25 per month, for up to ₦2M failed payments per month, with a 15% recovery share.",
+      "why_it_matters": "Directly matches a business with about ₦2M in failed payments monthly and provides both the flat fee and percentage fee needed to evaluate cost.",
+      "source": "Pricing section",
+      "observed_at_step": 2
+    },
+    {
+      "claim": "Growth plan: Approximately $69 per month, for up to ₦15M failed payments per month, with an 18% recovery share.",
+      "why_it_matters": "Gives alternative pricing and take rate if monthly failed volume grows beyond ₦2M, relevant for cost comparison.",
+      "source": "Pricing section",
+      "observed_at_step": 2
+    },
+    {
+      "claim": "Scale plan: Approximately $160+ per month, unlimited volume and multi-currency, with a 20% recovery share.",
+      "why_it_matters": "Shows pricing and take rate for very high volumes, useful for evaluating longer-term cost implications.",
+      "source": "Pricing section",
+      "observed_at_step": 2
+    },
+    {
+      "claim": "Plans are billed in Naira.",
+      "why_it_matters": "Confirms charges are in local currency, important for a Nigerian business assessing costs.",
+      "source": "Pricing section heading",
+      "observed_at_step": 2
+    },
+    {
+      "claim": "On Pay-on-Recovery, you owe nothing if Reclaim doesn't recover anything.",
+      "why_it_matters": "Clarifies that there is no downside cost on the Pay-on-Recovery plan, which affects financial risk when deciding if it’s worth using.",
+      "source": "FAQ — 'What happens if you don't recover anything?'",
+      "observed_at_step": 4
+    },
+    {
+      "claim": "On paid tiers, you still owe the flat fee even if nothing is recovered; the recovery share only applies to money actually recovered.",
+      "why_it_matters": "Confirms the downside risk and fee structure on paid tiers, necessary to assess potential costs if recovery is low or zero.",
+      "source": "FAQ — 'What happens if you don't recover anything?'",
+      "observed_at_step": 4
+    },
+    {
+      "claim": "Add your Paystack secret key so we can read your transactions — no card numbers ever touch our servers. Ten minutes, no developer required.",
+      "why_it_matters": "Indicates minimal setup time and no engineering cost, reducing implementation overhead when considering financial worth.",
+      "source": "How it works — Step 01 (Connect)",
+      "observed_at_step": 5
+    },
+    {
+      "claim": "We pull 90 days of failed transactions across every rail — card, bank transfer, USSD, mobile money — and show exactly what's recoverable.",
+      "why_it_matters": "Covers multiple payment types and promises visibility into what’s recoverable, which helps estimate potential recovered revenue before committing.",
+      "source": "How it works — Step 02 (Analyze)",
+      "observed_at_step": 5
+    }
+  ],
+  "decision": {
+    "decision": "uncertain",
+    "confidence": "high",
+    "evidence_found": [
+      "Billed in Naira. Pay more only when we recover more. Every plan pairs a flat platform fee with a share of what we actually recover — so we only do well when you get paid. No recovered revenue? You pay nothing beyond your plan. (Pricing section)",
+      "Pay-on-Recovery: No flat fee; 25% of recovered amount only. Includes core retry + SMS follow-up and a recovery dashboard. (Pricing section)",
+      "Starter: ~$25/mo, up to ₦2M failed/month, 15% recovery share. (Pricing section)",
+      "On Pay-on-Recovery, you owe nothing if Reclaim doesn't recover anything; on paid tiers, you still owe the flat fee, but the recovery share only applies to money actually recovered. (FAQ)",
+      "We pull 90 days of failed transactions across every rail — card, bank transfer, USSD, mobile money — and show exactly what's recoverable. (How it works)",
+      "Free until we recover something. (Hero section)"
+    ],
+    "evidence_missing": [
+      "Any quantified recovery rate or expected recovered amount (e.g., average or typical percentage of failed payments recovered for Nigerian rails).",
+      "Case studies or benchmarks showing recovered payment value for merchants similar to those with ~₦2M failed payments/month.",
+      "Exact flat fee amounts stated in Naira for paid plans (site shows approximate $ amounts despite saying billed in ₦)."
+    ],
+    "what_helped": [
+      "Clear pricing structure with recovery-share percentages and plan caps, including a no-upfront-cost Pay-on-Recovery plan.",
+      "Confirmation that plans are billed in Naira, reducing FX uncertainty.",
+      "Starter plan explicitly matches up to ₦2M failed payments/month.",
+      "FAQ clarity on downside risk if nothing is recovered.",
+      "Setup appears simple (no developer required) and the product will show what’s recoverable after connecting."
+    ],
+    "what_blocked": [
+      "No numerical recovery performance data to estimate recovered value.",
+      "No Naira-denominated flat fee to compare precisely against recovery-share plans.",
+      "Only qualitative claim of getting “most” back and an illustrative (non-real) example, which cannot be used for calculation."
+    ],
+    "reason": "While the site provides fee structures and a risk-free Pay-on-Recovery option, it does not provide any quantified recovery rate or real benchmarks. Without an estimated recovered payment value, it’s impossible to calculate expected financial return for ~₦2M failed payments/month or to compare the paid Starter plan (flat fee + 15%) versus Pay-on-Recovery (25%). Therefore, whether Reclaim is financially worth using cannot be determined from the available evidence.",
+    "recommendation": "Start with the Pay-on-Recovery plan (25% only when money is recovered) to eliminate downside risk. Connect your Paystack account to see the 90‑day analysis of what’s recoverable. Ask Reclaim for: (1) typical recovery benchmarks for businesses similar to yours and (2) the exact flat fee in Naira for the Starter plan. Use those to compare plans: Starter becomes cheaper than Pay‑on‑Recovery when (0.10 × your recovered amount) exceeds the flat fee in ₦."
+  }
+}

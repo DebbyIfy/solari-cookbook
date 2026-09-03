@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: #111318; }
+  a { color: #C7F36B; }
+  a:hover { color: #d9fa96; }
+  @keyframes pulseDot { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes tickIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes markerPing { 0% { box-shadow: 0 0 0 0 rgba(199,243,107,0.5); } 100% { box-shadow: 0 0 0 8px rgba(199,243,107,0); } }
+</style>
+</helmet>
+
+<div style="min-height:100vh;display:flex;flex-direction:column;background:#111318;color:#EDEBE3;font-family:'Inter',sans-serif;">
+
+  <div style="height:64px;flex-shrink:0;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:0 32px;border-bottom:1px solid #23262F;">
+    <div style="font-family:'Instrument Serif',serif;font-size:21px;letter-spacing:-0.01em;justify-self:start;"><span style="color:#C7F36B;">First</span><span style="color:#EDEBE3;">User</span></div>
+    <div style="display:flex;align-items:center;gap:10px;font-size:13px;justify-self:center;">
+      <span style="{{ stepLabelStyle.create }}" onClick="{{ goCreate }}">Create</span>
+      <span style="color:#3A3D46;">—</span>
+      <span style="{{ stepLabelStyle.live }}" onClick="{{ goLive }}">Explore</span>
+      <span style="color:#3A3D46;">—</span>
+      <span style="{{ stepLabelStyle.report }}" onClick="{{ goReport }}">Report</span>
+    </div>
+    <div style="{{ sessionBadgeStyle }}">
+      <div style="{{ sessionBadgeDotStyle }}"></div>
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:0.05em;">{{ sessionBadgeText }}</span>
+    </div>
+  </div>
+
+  <sc-if value="{{ isCreate }}" hint-placeholder-val="{{ true }}">
+    <div style="flex:1;display:flex;justify-content:center;padding:56px 40px 80px;animation:fadeUp 0.4s ease both;">
+      <div style="width:100%;max-width:1180px;display:flex;gap:64px;align-items:flex-start;">
+
+        <div style="width:380px;flex-shrink:0;position:sticky;top:56px;">
+          <div style="font-family:'Instrument Serif',serif;font-size:42px;line-height:1.14;letter-spacing:-0.01em;margin-bottom:16px;">What do you want to learn about your website?</div>
+          <div style="color:#9A9DA6;font-size:15px;line-height:1.6;margin-bottom:28px;">Give FirstUser a website and a question. It explores the experience like a first-time visitor, gathers evidence, and tells you what it found.</div>
+
+          <div style="font-size:11px;font-weight:600;color:#7A7D86;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;">Website</div>
+          <input type="text" value="{{ website }}" onChange="{{ updateWebsite }}" placeholder="https://yourwebsite.com" style="width:100%;box-sizing:border-box;padding:14px 16px;font-size:14.5px;font-family:'IBM Plex Mono',monospace;border:1px solid #DCD8CC;border-radius:10px;background:#F4F1EA;color:#1B1B18;margin-bottom:16px;outline:none;" />
+
+          <div style="font-size:11px;font-weight:600;color:#7A7D86;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;">Persona</div>
+          <input type="text" value="{{ persona }}" onChange="{{ updatePersona }}" placeholder="e.g. Nigerian business owner" style="width:100%;box-sizing:border-box;padding:14px 16px;font-size:14.5px;font-family:'Inter',sans-serif;border:1px solid #DCD8CC;border-radius:10px;background:#F4F1EA;color:#1B1B18;margin-bottom:10px;outline:none;" />
+          <div style="font-size:12px;color:#6E7178;line-height:1.5;">Starting an investigation sends this website, persona, and mission to a real FirstUser browser session.</div>
+
+          <sc-if value="{{ hasStartError }}" hint-placeholder-val="{{ false }}">
+            <div style="margin-top:16px;padding:12px 14px;border:1px solid #7A3A3A;background:#2A1414;border-radius:10px;font-size:13px;color:#F0B8B8;line-height:1.5;">{{ startErrorText }}</div>
+          </sc-if>
+        </div>
+
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:11px;font-weight:600;color:#7A7D86;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:14px;">Choose what to investigate</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;">
+            <sc-for list="{{ questions }}" as="q" hint-placeholder-count="7">
+              <div onClick="{{ q.onClick }}" style="{{ q.cardStyle }}">
+                <div style="font-size:14.5px;font-weight:600;line-height:1.35;margin-bottom:4px;color:#1B1B18;">{{ q.title }}</div>
+                <sc-if value="{{ q.showDesc }}" hint-placeholder-val="{{ true }}">
+                  <div style="font-size:12.5px;color:#6E7178;line-height:1.45;">{{ q.desc }}</div>
+                </sc-if>
+              </div>
+            </sc-for>
+          </div>
+
+          <sc-if value="{{ isTaskSelected }}" hint-placeholder-val="{{ false }}">
+            <div style="margin-bottom:20px;">
+              <input type="text" value="{{ taskInput }}" onChange="{{ updateTaskInput }}" placeholder="e.g. Sign up for the free trial" style="width:100%;box-sizing:border-box;padding:14px 18px;font-size:14.5px;font-family:'Inter',sans-serif;border:1px solid #B9CC85;border-radius:10px;background:#EEF6D6;color:#1B1B18;outline:none;" />
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isCustomSelected }}" hint-placeholder-val="{{ false }}">
+            <div style="margin-bottom:20px;">
+              <textarea value="{{ customMission }}" onChange="{{ updateCustomMission }}" rows="3" style="width:100%;box-sizing:border-box;padding:18px;font-size:15px;font-family:'Instrument Serif',serif;font-style:italic;line-height:1.5;color:#1B1B18;border:1px solid #B9CC85;border-radius:10px;background:#EEF6D6;outline:none;resize:vertical;"></textarea>
+            </div>
+          </sc-if>
+
+          <div style="display:flex;flex-direction:column;gap:20px;">
+            <sc-if value="{{ showMissionPreview }}" hint-placeholder-val="{{ false }}">
+              <div style="position:relative;background:#EEF6D6;border:1px solid #B9CC85;border-radius:14px;padding:22px 24px 20px;">
+                <div style="font-size:11px;font-weight:600;color:#6B7A3E;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;">Mission</div>
+                <div style="font-family:'Instrument Serif',serif;font-style:italic;font-size:17px;line-height:1.5;color:#1B1B18;">{{ missionPreviewText }}</div>
+              </div>
+            </sc-if>
+            <div style="display:flex;align-items:center;gap:16px;">
+              <button onClick="{{ startTest }}" disabled="{{ startDisabled }}" style="{{ startButtonStyle }}">{{ startButtonLabel }}</button>
+              <span onClick="{{ startDemo }}" style="font-size:13px;color:#7A7D86;cursor:pointer;text-decoration:underline;">Watch a recorded demo instead</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isLive }}" hint-placeholder-val="{{ false }}">
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;padding:32px 24px 40px;animation:fadeUp 0.4s ease both;overflow:hidden;">
+      <div style="width:100%;max-width:1240px;display:flex;flex-direction:column;min-height:0;">
+
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+          <div style="display:flex;align-items:center;gap:9px;">
+            <div style="{{ statusDotStyle }}"></div>
+            <div style="font-size:15px;font-weight:600;">{{ statusText }}</div>
+          </div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:#6E7178;">target: {{ websiteHost }}</div>
+        </div>
+        <div style="font-size:12.5px;color:#6E7178;margin-bottom:20px;line-height:1.5;">{{ liveSubtitle }}</div>
+
+        <sc-if value="{{ hasLiveError }}" hint-placeholder-val="{{ false }}">
+          <div style="margin-bottom:20px;padding:14px 18px;border:1px solid #7A3A3A;background:#2A1414;border-radius:12px;font-size:13.5px;color:#F0B8B8;line-height:1.55;display:flex;justify-content:space-between;align-items:center;gap:16px;">
+            <span>{{ liveErrorText }}</span>
+            <button onClick="{{ goCreate }}" style="flex-shrink:0;padding:9px 16px;font-size:13px;font-weight:600;border:1px solid #9A5555;border-radius:8px;background:transparent;color:#F0B8B8;cursor:pointer;">Back to Create</button>
+          </div>
+        </sc-if>
+
+        <div style="display:flex;gap:24px;align-items:flex-start;">
+        <div style="flex:1.5;min-width:0;border-radius:20px;overflow:hidden;border:1px solid #23262F;box-shadow:0 24px 60px rgba(0,0,0,0.4);">
+          <div style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:#1A1D24;border-bottom:1px solid #23262F;">
+            <div style="display:flex;gap:6px;">
+              <div style="width:9px;height:9px;border-radius:50%;background:#33363F;"></div>
+              <div style="width:9px;height:9px;border-radius:50%;background:#33363F;"></div>
+              <div style="width:9px;height:9px;border-radius:50%;background:#33363F;"></div>
+            </div>
+            <div style="flex:1;background:#111318;border:1px solid #2E313B;border-radius:7px;padding:7px 12px;font-size:12px;color:#B7B9C0;font-family:'IBM Plex Mono',monospace;transition:all 0.3s ease;">{{ currentUrl }}</div>
+            <div style="{{ browserChipStyle }}">{{ browserChipText }}</div>
+          </div>
+
+          <sc-if value="{{ isDemoMode }}" hint-placeholder-val="{{ true }}">
+          <div style="position:relative;background:#F4F1EA;padding:32px 36px;min-height:360px;">
+            <div style="{{ markerDotStyle }}"></div>
+            <div style="{{ markerRingStyle }}"></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;">
+              <div style="font-family:'Instrument Serif',serif;font-size:19px;color:#1B1B18;">Reclaim</div>
+              <div style="display:flex;gap:20px;font-size:12.5px;color:#6E7178;">
+                <span>Pricing</span><span>FAQ</span><span>How it works</span>
+              </div>
+            </div>
+
+            <div style="{{ heroBoxStyle }}">
+              <div style="font-size:10.5px;font-family:'IBM Plex Mono',monospace;color:#9C988C;margin-bottom:10px;">[hero]</div>
+              <div style="width:65%;height:13px;background:#E2DFD2;border-radius:3px;margin-bottom:8px;"></div>
+              <div style="width:44%;height:13px;background:#E2DFD2;border-radius:3px;"></div>
+            </div>
+
+            <div style="{{ pricingBoxStyle }}">
+              <div style="font-size:10.5px;font-family:'IBM Plex Mono',monospace;color:#9C988C;margin-bottom:10px;">[pricing tiers]</div>
+              <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+                <div style="border:1px solid #DCD8CC;border-radius:8px;height:64px;background:#EAE7DF;"></div>
+                <div style="border:1px solid #DCD8CC;border-radius:8px;height:64px;background:#EAE7DF;"></div>
+                <div style="border:1px solid #DCD8CC;border-radius:8px;height:64px;background:#EAE7DF;"></div>
+              </div>
+            </div>
+
+            <div style="{{ faqBoxStyle }}">
+              <div style="font-size:10.5px;font-family:'IBM Plex Mono',monospace;color:#9C988C;margin-bottom:10px;">[faq]</div>
+              <div style="width:100%;height:12px;background:#E2DFD2;border-radius:3px;margin-bottom:7px;"></div>
+              <div style="width:80%;height:12px;background:#E2DFD2;border-radius:3px;"></div>
+            </div>
+
+            <div style="{{ howBoxStyle }}">
+              <div style="font-size:10.5px;font-family:'IBM Plex Mono',monospace;color:#9C988C;margin-bottom:10px;">[how it works]</div>
+              <div style="width:90%;height:12px;background:#E2DFD2;border-radius:3px;margin-bottom:7px;"></div>
+              <div style="width:60%;height:12px;background:#E2DFD2;border-radius:3px;"></div>
+            </div>
+          </div>
+          </sc-if>
+
+          <sc-if value="{{ isLiveMode }}" hint-placeholder-val="{{ false }}">
+          <div style="position:relative;background:#000;min-height:360px;display:flex;align-items:center;justify-content:center;">
+            <sc-if value="{{ hasLiveScreenshot }}" hint-placeholder-val="{{ false }}">
+              <img src="{{ latestScreenshotUrl }}" style="width:100%;display:block;" />
+            </sc-if>
+            <sc-if value="{{ noLiveScreenshotYet }}" hint-placeholder-val="{{ true }}">
+              <div style="color:#6E7178;font-size:13px;font-family:'IBM Plex Mono',monospace;padding:80px 0;">Waiting for the first observation…</div>
+            </sc-if>
+          </div>
+          </sc-if>
+        </div>
+
+        <div style="width:360px;flex-shrink:0;background:#1A1D24;border:1px solid #23262F;border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:20px;max-height:min(600px,calc(100vh - 220px));overflow:auto;">
+          <div style="display:flex;gap:18px;">
+            <div>
+              <div style="font-size:22px;font-weight:400;font-family:'Instrument Serif',serif;">{{ observationCount }}</div>
+              <div style="font-size:10.5px;color:#7A7D86;">observations</div>
+            </div>
+            <div>
+              <div style="font-size:22px;font-weight:400;font-family:'Instrument Serif',serif;">{{ actionCount }}</div>
+              <div style="font-size:10.5px;color:#7A7D86;">actions</div>
+            </div>
+            <div>
+              <div style="font-size:22px;font-weight:400;font-family:'Instrument Serif',serif;color:#C7F36B;">{{ evidenceCount }}</div>
+              <div style="font-size:10.5px;color:#7A7D86;">evidence</div>
+            </div>
+          </div>
+
+          <div style="height:1px;background:#23262F;"></div>
+
+          <div>
+            <div style="font-size:11px;font-weight:600;color:#7A7D86;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">Currently investigating</div>
+            <div style="font-size:15px;font-weight:600;margin-bottom:12px;">{{ currentPhaseTitle }}</div>
+            <div style="font-size:11px;font-weight:600;color:#7A7D86;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Mission</div>
+            <div style="font-size:13px;color:#B7B9C0;line-height:1.5;">{{ currentLookingFor }}</div>
+          </div>
+
+          <sc-if value="{{ hasEvidenceMoment }}" hint-placeholder-val="{{ false }}">
+            <div style="background:#111318;border:1px solid #3A3D2A;border-radius:10px;padding:12px 14px;">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;">
+                <div style="width:6px;height:6px;border-radius:50%;background:#C7F36B;"></div>
+                <div style="font-size:10px;font-weight:600;color:#C7F36B;text-transform:uppercase;letter-spacing:0.06em;">Evidence captured</div>
+              </div>
+              <div style="font-size:12.5px;line-height:1.45;color:#EDEBE3;">{{ lastEvidenceText }}</div>
+            </div>
+          </sc-if>
+
+          <div style="height:1px;background:#23262F;"></div>
+
+          <div>
+            <div style="font-size:11px;font-weight:600;color:#7A7D86;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;">Journey</div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <sc-for list="{{ steps }}" as="s" hint-placeholder-count="10">
+                <div style="display:flex;align-items:flex-start;gap:8px;animation:tickIn 0.35s ease both;">
+                  <div style="{{ s.iconStyle }}">{{ s.icon }}</div>
+                  <div style="{{ s.labelStyle }}">{{ s.label }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <sc-if value="{{ explorationDone }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ goToReport }}" style="width:100%;padding:13px 20px;font-size:14.5px;font-weight:600;border:none;border-radius:10px;background:#C7F36B;color:#1C2405;cursor:pointer;animation:fadeUp 0.4s ease both;">View findings</button>
+          </sc-if>
+        </div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isReport }}" hint-placeholder-val="{{ false }}">
+    <div style="flex:1;display:flex;justify-content:center;padding:48px 24px 100px;animation:fadeUp 0.4s ease both;">
+      <div style="width:100%;max-width:840px;">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:24px;font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:#6E7178;">
+          <span>{{ reportSourceLabel }}</span>
+          <span>persona: {{ submittedPersona }}</span>
+        </div>
+
+        <div style="background:#F4F1EA;color:#1B1B18;border-radius:24px;padding:56px 60px;box-shadow:0 30px 70px rgba(0,0,0,0.35);">
+
+          <div style="font-family:'Instrument Serif',serif;font-style:italic;font-size:17px;color:#77746A;line-height:1.55;margin-bottom:36px;">{{ missionPreviewText }}</div>
+
+          <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px;">
+            <div style="{{ confidenceChipStyle }}">
+              <div style="{{ confidenceDotStyle }}"></div>
+              <span style="font-size:13px;font-weight:600;letter-spacing:0.02em;">{{ confidenceLabel }}</span>
+            </div>
+          </div>
+          <div style="{{ decisionHeadlineStyle }}">{{ decisionHeadlineText }}</div>
+          <div style="font-size:19px;line-height:1.55;margin-bottom:48px;max-width:620px;">{{ decisionReasonText }}</div>
+
+          <div style="height:1px;background:#DCD8CC;margin-bottom:40px;"></div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:36px;margin-bottom:44px;">
+            <div>
+              <div style="font-size:13px;font-weight:700;margin-bottom:16px;">What helped</div>
+              <div style="display:flex;flex-direction:column;gap:16px;">
+                <sc-for list="{{ helped }}" as="h" hint-placeholder-count="3">
+                  <div style="display:flex;gap:10px;align-items:flex-start;">
+                    <div style="width:7px;height:7px;border-radius:50%;background:#7BA7FF;margin-top:6px;flex-shrink:0;"></div>
+                    <div style="font-size:14.5px;line-height:1.5;font-weight:500;">{{ h }}</div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+            <div>
+              <div style="font-size:13px;font-weight:700;margin-bottom:16px;">What blocked the decision</div>
+              <div style="display:flex;flex-direction:column;gap:16px;">
+                <sc-for list="{{ blocked }}" as="b" hint-placeholder-count="3">
+                  <div style="display:flex;gap:10px;align-items:flex-start;">
+                    <div style="width:7px;height:7px;border-radius:50%;background:#E87575;margin-top:6px;flex-shrink:0;"></div>
+                    <div style="font-size:14.5px;line-height:1.5;font-weight:500;">{{ b }}</div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+
+          <sc-if value="{{ hasRecommendation }}" hint-placeholder-val="{{ true }}">
+          <div style="position:relative;background:#EAE7DF;border-radius:16px;padding:28px 32px 26px;margin-bottom:56px;">
+            <div style="font-size:11px;font-weight:600;color:#8C897E;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;">Recommendation</div>
+            <div style="font-family:'Instrument Serif',serif;font-size:20px;line-height:1.5;">{{ recommendationText }}</div>
+          </div>
+          </sc-if>
+
+          <div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#8C897E;margin-bottom:20px;">Evidence trail</div>
+          <div style="display:flex;flex-direction:column;gap:14px;margin-bottom:24px;">
+            <sc-for list="{{ evidenceFoundList }}" as="e" hint-placeholder-count="5">
+              <div style="display:flex;gap:18px;border:1px solid #DCD8CC;border-radius:16px;padding:16px 18px;align-items:flex-start;">
+                <div style="position:relative;width:88px;height:60px;border-radius:10px;flex-shrink:0;background:repeating-linear-gradient(135deg,#EFECE3,#EFECE3 6px,#E2DFD2 6px,#E2DFD2 12px);">
+                  <div style="position:absolute;top:6px;right:6px;width:8px;height:8px;border-radius:50%;background:#C7F36B;box-shadow:0 0 0 3px rgba(199,243,107,0.35);"></div>
+                </div>
+                <div>
+                  <div style="font-size:14.5px;font-weight:600;line-height:1.4;margin-bottom:4px;">{{ e.claim }}</div>
+                  <div style="font-size:12.5px;color:#6E7178;line-height:1.45;margin-bottom:7px;">{{ e.why }}</div>
+                  <div style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:#6E7178;border:1px solid #DCD8CC;border-radius:5px;padding:2px 7px;display:inline-block;">{{ e.source }}</div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#C24444;margin-bottom:14px;">Evidence gaps</div>
+          <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:56px;">
+            <sc-for list="{{ evidenceGapsList }}" as="g" hint-placeholder-count="3">
+              <div style="display:flex;gap:10px;align-items:flex-start;">
+                <div style="width:7px;height:7px;border-radius:50%;border:2px solid #E87575;margin-top:5px;flex-shrink:0;"></div>
+                <div>
+                  <div style="font-size:14px;font-weight:600;line-height:1.4;">{{ g.claim }}</div>
+                  <div style="font-size:12.5px;color:#6E7178;line-height:1.45;">{{ g.why }}</div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#8C897E;margin-bottom:24px;">Research journey</div>
+          <div style="display:flex;flex-direction:column;gap:24px;margin-bottom:8px;">
+            <sc-for list="{{ journeyList }}" as="j" hint-placeholder-count="5">
+              <div style="display:flex;gap:20px;">
+                <div style="font-family:'Instrument Serif',serif;font-size:24px;color:#B5B0A2;width:34px;flex-shrink:0;">{{ j.num }}</div>
+                <div>
+                  <div style="font-size:14.5px;font-weight:700;margin-bottom:3px;">{{ j.title }}</div>
+                  <div style="font-size:13.5px;color:#6E7178;line-height:1.5;">{{ j.desc }}</div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+
+          <sc-if value="{{ hasReportScreenshots }}" hint-placeholder-val="{{ false }}">
+            <div style="height:1px;background:#DCD8CC;margin:40px 0;"></div>
+            <div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#8C897E;margin-bottom:20px;">Screenshots</div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+              <sc-for list="{{ reportScreenshots }}" as="shot" hint-placeholder-count="6">
+                <img src="{{ shot.url }}" style="width:100%;border-radius:10px;border:1px solid #DCD8CC;display:block;" />
+              </sc-for>
+            </div>
+          </sc-if>
+        </div>
+
+        <div style="display:flex;justify-content:center;margin-top:40px;">
+          <button onClick="{{ restart }}" style="padding:12px 22px;font-size:14px;font-weight:600;border:1px solid #33363F;border-radius:10px;background:transparent;color:#EDEBE3;cursor:pointer;">Run another investigation</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const QUESTIONS = [
+  { id: 'understand', title: 'Can visitors understand my product?', desc: "As a first-time visitor, can I understand what this product does, who it's for, and why I should care?" },
+  { id: 'start', title: 'Can visitors figure out how to get started?', desc: 'Can a first-time visitor understand what to do next and successfully get started?' },
+  { id: 'trust', title: 'Would visitors trust this product?', desc: 'Do I have enough information and confidence to trust this product?' },
+  { id: 'signup', title: 'Would visitors sign up?', desc: 'As a potential customer, do I have enough information and confidence to sign up?' },
+  { id: 'find', title: 'Can visitors find what they need?', desc: 'Can a first-time visitor find important information without getting confused or lost?' },
+  { id: 'task', title: 'Can visitors complete a task?', desc: 'Give FirstUser a specific task to investigate.' },
+  { id: 'custom', title: 'Ask my own question', desc: 'Write your own mission in plain language.' },
+];
+
+const DEFAULT_PERSONA = 'Nigerian business owner';
+const EXAMPLE_MISSION = "I have about ₦2M in failed payments per month. Decide whether Reclaim is financially worth using. Use only evidence available on the website. Do not make up a recovery rate, expected recovery amount, or any other financial assumption.";
+
+// ---- DEMO-only fixtures. Never shown as, or mixed into, a live result. ----
+
+const PHASE_TITLES = { hero: 'Homepage', pricing: 'Pricing structure', faq: 'FAQ', how: 'How it works', done: 'Compiling conclusion' };
+const PHASE_URLS = { hero: 'reclaim.buildneststudio.com', pricing: 'reclaim.buildneststudio.com/pricing', faq: 'reclaim.buildneststudio.com/faq', how: 'reclaim.buildneststudio.com/how-it-works', done: 'reclaim.buildneststudio.com/how-it-works' };
+const PHASE_MARKER = { hero: { left: '32%', top: '30%' }, pricing: { left: '58%', top: '48%' }, faq: { left: '42%', top: '58%' }, how: { left: '50%', top: '52%' }, done: { left: '50%', top: '50%' } };
+
+const DEMO_STEPS = [
+  { phase: 'hero', type: 'act', label: 'Opened homepage', lookingFor: "what Reclaim does and who it's for", evidence: 'Reclaim recovers failed payments automatically.' },
+  { phase: 'hero', type: 'observe', label: 'Identified the target customer', lookingFor: "whether this applies to the visitor's business", evidence: 'Built for subscription and recurring-billing businesses.' },
+  { phase: 'pricing', type: 'act', label: 'Opened pricing page', lookingFor: 'cost structure and plan fit', evidence: 'Starter plan supports up to ₦2M/month in failed payments.' },
+  { phase: 'pricing', type: 'observe', label: 'Reviewed the Pay-on-Recovery mechanic', lookingFor: 'whether fees carry downside risk', evidence: 'Fees only apply to money actually recovered.' },
+  { phase: 'pricing', type: 'observe', label: 'Searched for a quantified recovery rate', lookingFor: 'expected return on the fee', evidence: null },
+  { phase: 'faq', type: 'act', label: 'Opened FAQ', lookingFor: 'how fees are calculated and how risk is handled', evidence: 'Card data is handled through Paystack, not stored directly.' },
+  { phase: 'faq', type: 'observe', label: 'Looked for recovery case studies or proof', lookingFor: 'external evidence the mechanic works', evidence: null },
+  { phase: 'how', type: 'act', label: 'Opened How it works', lookingFor: 'integration effort and time to value', evidence: 'Integration takes a single API key, no checkout changes.' },
+  { phase: 'how', type: 'observe', label: 'Checked for NGN pricing or local context', lookingFor: "whether cost is comparable to the visitor's currency", evidence: null },
+  { phase: 'done', type: 'observe', label: 'Compiling verdict', lookingFor: 'whether enough evidence exists to conclude', evidence: 'Cancellation policy and support contact are visible.' },
+];
+
+const DEMO_HELPED = ['Clear pricing structure', 'Starter plan matches the stated failed-payment volume', 'Pay-on-Recovery reduces downside risk'];
+const DEMO_BLOCKED = ['No quantified recovery rate', 'No concrete recovery examples', "Pricing isn't clearly expressed in NGN"];
+const DEMO_SUMMARY = "FirstUser couldn't determine whether Reclaim is financially worthwhile from the information available on the website.";
+const DEMO_RECOMMENDATION = "Connect your Paystack account to see what is actually recoverable, then compare the recovered amount against Reclaim's fees.";
+
+const DEMO_EVIDENCE_FOUND = [
+  { claim: 'Starter plan supports up to ₦2M in failed payments per month', why: "Matches the visitor's stated failed-payment volume exactly.", source: 'Pricing page' },
+  { claim: 'Fees only apply under the Pay-on-Recovery model', why: "Removes the downside risk of paying for a service that doesn't recover anything.", source: 'Pricing page' },
+  { claim: 'The homepage clearly states who Reclaim is for', why: 'A first-time visitor can quickly tell if this applies to their business.', source: 'Homepage' },
+  { claim: 'Integration takes a single API key, no checkout changes', why: 'Lowers the perceived cost of trying it.', source: 'How it works' },
+  { claim: 'Cancellation policy and support contact are visible', why: 'Reduces the risk of getting locked into an unclear commitment.', source: 'Pricing page' },
+];
+const DEMO_EVIDENCE_GAPS = [
+  { claim: 'No recovery rate is published anywhere on the site', why: "Without it, expected return can't be estimated." },
+  { claim: 'No case studies or customer results are shown', why: "There's no external proof the recovery mechanic actually works." },
+  { claim: 'Pricing is shown only in USD', why: "Can't be directly compared to a NGN-denominated cost estimate." },
+];
+const DEMO_JOURNEY = [
+  { num: '01', title: 'Homepage', desc: "Understood who Reclaim is for and what problem it solves." },
+  { num: '02', title: 'Pricing', desc: 'Found the Starter plan and the Pay-on-Recovery pricing mechanic.' },
+  { num: '03', title: 'FAQ', desc: 'Investigated downside risk and how fees are calculated.' },
+  { num: '04', title: 'How it works', desc: 'Found integration details and confirmed ease of adoption.' },
+  { num: '05', title: 'Conclusion', desc: 'Could not establish a quantified recovery rate to complete the financial picture.' },
+];
+
+const SIGNAL = '#C7F36B';
+const PAPER = '#F4F1EA';
+const BORDER_PAPER = '#DCD8CC';
+const MUTED_ON_DARK = '#9A9DA6';
+const FAINT_ON_DARK = '#4E5058';
+
+const POLL_INTERVAL_MS = 1500;
+
+function actionLabel(action, targetText) {
+  if (action === 'click_link' || action === 'click_button') return targetText ? `Opened "${targetText}"` : 'Opened a linked section';
+  if (action === 'toggle_expandable') return targetText ? `Expanded "${targetText}"` : 'Expanded a section';
+  if (action === 'scroll') return 'Scrolled to explore more of the page';
+  return 'Explored the page';
+}
+
+class Component extends DCLogic {
+  state = {
+    screen: 'create',
+    maxScreen: 0,
+    website: 'https://reclaim.buildneststudio.com',
+    persona: DEFAULT_PERSONA,
+    selectedQuestionId: 'custom',
+    customMission: EXAMPLE_MISSION,
+    taskInput: '',
+
+    runMode: null, // 'live' | 'demo'
+    submitted: null, // { website, persona, mission } snapshot at start time
+
+    // demo simulation
+    stepIndex: 0,
+    explorationDone: false,
+
+    // live session
+    testId: null,
+    liveStatus: null,
+    liveResult: null,
+    startError: null,
+  };
+
+  componentWillUnmount() {
+    if (this.demoTimer) clearInterval(this.demoTimer);
+    if (this.pollTimer) clearInterval(this.pollTimer);
+  }
+
+  selectQuestion = (id) => this.setState({ selectedQuestionId: id });
+  updateWebsite = (e) => this.setState({ website: e.target.value });
+  updatePersona = (e) => this.setState({ persona: e.target.value });
+  updateCustomMission = (e) => this.setState({ customMission: e.target.value });
+  updateTaskInput = (e) => this.setState({ taskInput: e.target.value });
+
+  missionText() {
+    const s = this.state;
+    if (s.selectedQuestionId === 'custom') return s.customMission;
+    if (s.selectedQuestionId === 'task') {
+      const t = s.taskInput.trim();
+      return t ? `Visit the website and attempt to: "${t}". Report on whether a first-time visitor could complete it and what got in the way.` : '';
+    }
+    const q = QUESTIONS.find(q => q.id === s.selectedQuestionId);
+    return q ? q.desc : '';
+  }
+
+  canStart() {
+    const s = this.state;
+    if (!s.website.trim()) return false;
+    if (!s.persona.trim()) return false;
+    if (s.selectedQuestionId === 'custom') return !!s.customMission.trim();
+    if (s.selectedQuestionId === 'task') return !!s.taskInput.trim();
+    return true;
+  }
+
+  // -----------------------------------
+  // LIVE: real backend session
+  // -----------------------------------
+
+  startTest = async () => {
+    if (!this.canStart()) return;
+
+    const submitted = {
+      website: this.state.website.trim(),
+      persona: this.state.persona.trim(),
+      mission: this.missionText().trim(),
+    };
+
+    this.setState({ startError: null });
+
+    let response;
+    try {
+      response = await fetch('/api/tests', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          websiteUrl: submitted.website,
+          persona: submitted.persona,
+          goal: submitted.mission,
+        }),
+      });
+    } catch (err) {
+      this.setState({ startError: 'Could not reach the FirstUser server. Is it running?' });
+      return;
+    }
+
+    let data;
+    try {
+      data = await response.json();
+    } catch (err) {
+      data = null;
+    }
+
+    if (!response.ok) {
+      this.setState({ startError: (data && data.error) || 'Could not start the investigation.' });
+      return;
+    }
+
+    this.setState({
+      runMode: 'live',
+      submitted,
+      testId: data.testId,
+      liveStatus: null,
+      liveResult: null,
+      startError: null,
+      screen: 'live',
+      maxScreen: 1,
+    });
+
+    this.pollTimer = setInterval(() => this.pollStatus(), POLL_INTERVAL_MS);
+    this.pollStatus();
+  };
+
+  pollStatus = async () => {
+    const testId = this.state.testId;
+    if (!testId) return;
+
+    let response;
+    try {
+      response = await fetch(`/api/tests/${testId}/status`);
+    } catch (err) {
+      return; // transient network hiccup — try again on the next tick
+    }
+
+    if (!response.ok) return;
+
+    const data = await response.json();
+    this.setState({ liveStatus: data });
+
+    if (data.status === 'completed' || data.status === 'error') {
+      if (this.pollTimer) clearInterval(this.pollTimer);
+      if (data.status === 'completed') this.fetchResult();
+    }
+  };
+
+  fetchResult = async () => {
+    const testId = this.state.testId;
+    if (!testId) return;
+
+    try {
+      const response = await fetch(`/api/tests/${testId}/result`);
+      if (!response.ok) return;
+      const data = await response.json();
+      this.setState({ liveResult: data });
+    } catch (err) {
+      // report screen falls back to liveStatus fields if this never arrives
+    }
+  };
+
+  // -----------------------------------
+  // DEMO: recorded, clearly-labeled simulation
+  // -----------------------------------
+
+  startDemo = () => {
+    const submitted = {
+      website: this.state.website.trim() || 'yourwebsite.com',
+      persona: this.state.persona.trim() || DEFAULT_PERSONA,
+      mission: this.missionText().trim() || EXAMPLE_MISSION,
+    };
+
+    this.setState({
+      runMode: 'demo',
+      submitted,
+      screen: 'live',
+      maxScreen: 1,
+      stepIndex: 0,
+      explorationDone: false,
+    });
+    this.demoTimer = setInterval(() => this.tick(), 1200);
+  };
+
+  tick() {
+    this.setState((s) => {
+      if (s.stepIndex >= DEMO_STEPS.length) { clearInterval(this.demoTimer); return null; }
+      const nextIndex = s.stepIndex + 1;
+      if (nextIndex >= DEMO_STEPS.length) {
+        clearInterval(this.demoTimer);
+        setTimeout(() => this.setState({ explorationDone: true }), 500);
+      }
+      return { stepIndex: nextIndex };
+    });
+  }
+
+  // -----------------------------------
+  // NAVIGATION
+  // -----------------------------------
+
+  goToReport = () => this.setState({ screen: 'report', maxScreen: 2 });
+  goCreate = () => this.setState({ screen: 'create' });
+  goLive = () => this.setState((s) => (s.maxScreen >= 1 ? { screen: 'live' } : null));
+  goReport = () => this.setState((s) => (s.maxScreen >= 2 ? { screen: 'report' } : null));
+
+  restart = () => {
+    if (this.demoTimer) clearInterval(this.demoTimer);
+    if (this.pollTimer) clearInterval(this.pollTimer);
+    this.setState({
+      screen: 'create',
+      maxScreen: 0,
+      runMode: null,
+      submitted: null,
+      stepIndex: 0,
+      explorationDone: false,
+      testId: null,
+      liveStatus: null,
+      liveResult: null,
+      startError: null,
+    });
+  };
+
+  renderVals() {
+    const s = this.state;
+    const isLiveMode = s.runMode === 'live';
+    const isDemoMode = s.runMode !== 'live';
+
+    const questions = QUESTIONS.map((q) => {
+      const selected = q.id === s.selectedQuestionId;
+      return {
+        id: q.id, title: q.title, desc: q.desc,
+        showDesc: q.id !== 'custom',
+        onClick: () => this.selectQuestion(q.id),
+        cardStyle: {
+          border: selected ? `2px solid #A9C94A` : `1px solid ${BORDER_PAPER}`,
+          background: PAPER, borderRadius: '14px', padding: selected ? '13px 15px' : '14px 16px', cursor: 'pointer',
+          boxShadow: selected ? `0 0 0 3px rgba(199,243,107,0.3)` : 'none',
+          gridColumn: q.id === 'custom' ? '1 / -1' : 'auto',
+        },
+      };
+    });
+
+    const missionText = this.missionText();
+    const submitted = s.submitted;
+    const websiteHost = (submitted ? submitted.website : s.website).replace(/^https?:\/\//, '') || 'yourwebsite.com';
+    const submittedPersona = submitted ? submitted.persona : s.persona;
+    const submittedMissionText = submitted ? submitted.mission : missionText;
+
+    const stepLbl = (name) => ({
+      cursor: 'pointer',
+      color: s.screen === name ? '#EDEBE3' : MUTED_ON_DARK,
+      fontWeight: s.screen === name ? 600 : 400,
+    });
+
+    // ---- session badge (top right) ----
+    const sessionBadgeText = isLiveMode ? 'LIVE SESSION' : 'DEMO SESSION';
+    const sessionBadgeColor = isLiveMode ? SIGNAL : '#7A7D86';
+    const sessionBadgeStyle = {
+      display: 'flex', alignItems: 'center', gap: '6px', padding: '5px 11px',
+      border: `1px solid ${isLiveMode ? '#3A4A2A' : '#2E313B'}`, borderRadius: '8px', justifySelf: 'end',
+      color: isLiveMode ? SIGNAL : MUTED_ON_DARK,
+    };
+    const sessionBadgeDotStyle = {
+      width: '6px', height: '6px', borderRadius: '50%', background: sessionBadgeColor,
+      animation: isLiveMode && s.liveStatus && s.liveStatus.status !== 'completed' && s.liveStatus.status !== 'error' ? 'pulseDot 1.4s ease-in-out infinite' : 'none',
+    };
+
+    // -----------------------------------
+    // LIVE derived values
+    // -----------------------------------
+
+    const liveStatus = s.liveStatus;
+    const liveDone = !!liveStatus && (liveStatus.status === 'completed' || liveStatus.status === 'error');
+    const hasLiveError = isLiveMode && ((!!liveStatus && liveStatus.status === 'error') || !!s.startError);
+    const liveErrorText = (liveStatus && liveStatus.error) || s.startError || 'FirstUser ran into an unexpected problem.';
+
+    const liveStatusLabels = {
+      starting: 'Starting the browser session',
+      exploring: 'FirstUser is exploring',
+      evaluating: 'Compiling the final verdict',
+      completed: 'Exploration complete',
+      error: 'Investigation failed',
+    };
+
+    const liveJourneyLog = (liveStatus && liveStatus.journeyLog) || [];
+    const liveSteps = liveJourneyLog.map((label, i) => ({
+      label,
+      icon: (liveDone || i < liveJourneyLog.length - 1) ? '✓' : '→',
+      iconStyle: { width: '14px', flexShrink: 0, fontSize: '11px', fontWeight: 700, marginTop: '1px', color: SIGNAL },
+      labelStyle: { fontSize: '12.5px', lineHeight: 1.4, color: '#EDEBE3', fontWeight: (!liveDone && i === liveJourneyLog.length - 1) ? 600 : 400 },
+    }));
+
+    const lastEvidenceLogEntry = [...liveJourneyLog].reverse().find((l) => l.startsWith('Evidence captured:'));
+
+    // -----------------------------------
+    // DEMO derived values
+    // -----------------------------------
+
+    const doneCount = Math.min(s.stepIndex, DEMO_STEPS.length);
+    const doneSteps = DEMO_STEPS.slice(0, doneCount);
+
+    const demoStepView = (st, idx) => {
+      const done = idx < s.stepIndex;
+      const current = idx === s.stepIndex && s.stepIndex < DEMO_STEPS.length;
+      return {
+        label: st.label,
+        icon: done ? '✓' : '→',
+        iconStyle: { width: '14px', flexShrink: 0, fontSize: '11px', fontWeight: 700, marginTop: '1px', color: done ? SIGNAL : (current ? '#EDEBE3' : FAINT_ON_DARK) },
+        labelStyle: { fontSize: '12.5px', lineHeight: 1.4, color: done ? '#EDEBE3' : (current ? '#EDEBE3' : FAINT_ON_DARK), fontWeight: current ? 600 : 400 },
+      };
+    };
+    const demoSteps = DEMO_STEPS.map((st, i) => demoStepView(st, i));
+
+    const demoPhase = doneCount < DEMO_STEPS.length ? DEMO_STEPS[Math.min(s.stepIndex, DEMO_STEPS.length - 1)].phase : 'done';
+    const highlightStyle = (name) => ({
+      position: 'relative',
+      border: `1px solid ${demoPhase === name ? '#A9C94A' : BORDER_PAPER}`,
+      borderRadius: '14px', padding: '18px 20px', marginBottom: '16px',
+      background: demoPhase === name ? '#EEF6D6' : PAPER,
+      boxShadow: demoPhase === name ? '0 0 0 3px rgba(199,243,107,0.22)' : 'none',
+      transition: 'all 0.4s ease',
+    });
+
+    const demoLastEvidenceStep = [...doneSteps].reverse().find(st => st.evidence);
+    const demoCurrentStep = s.stepIndex < DEMO_STEPS.length ? DEMO_STEPS[s.stepIndex] : DEMO_STEPS[DEMO_STEPS.length - 1];
+
+    // -----------------------------------
+    // Unified Live-screen bindings
+    // -----------------------------------
+
+    const explorationDone = isLiveMode ? liveDone && !hasLiveError : s.explorationDone;
+    const statusText = isLiveMode ? (liveStatusLabels[liveStatus ? liveStatus.status : 'starting'] || 'Starting') : (s.explorationDone ? 'Exploration complete' : 'FirstUser is exploring');
+    const statusDotStyle = {
+      width: '9px', height: '9px', borderRadius: '50%',
+      background: hasLiveError ? '#E87575' : (explorationDone ? SIGNAL : '#7A7D86'),
+      animation: (!explorationDone && !hasLiveError) ? 'pulseDot 1.4s ease-in-out infinite' : 'none',
+    };
+
+    const currentUrl = isLiveMode ? ((liveStatus && liveStatus.currentUrl) || submitted?.website || '') : PHASE_URLS[demoPhase];
+    const currentPhaseTitle = isLiveMode ? ((liveStatus && liveStatus.currentActivity) || 'Getting started') : PHASE_TITLES[demoPhase];
+    const currentLookingFor = isLiveMode ? submittedMissionText : demoCurrentStep.lookingFor;
+    const hasEvidenceMoment = isLiveMode ? !!lastEvidenceLogEntry : !!demoLastEvidenceStep;
+    const lastEvidenceText = isLiveMode ? (lastEvidenceLogEntry || '').replace('Evidence captured: ', '') : (demoLastEvidenceStep ? demoLastEvidenceStep.evidence : '');
+    const observationCount = isLiveMode ? ((liveStatus && liveStatus.observations) || 0) : doneCount;
+    const actionCount = isLiveMode ? ((liveStatus && liveStatus.actions) || 0) : doneSteps.filter(st => st.type === 'act').length;
+    const evidenceCount = isLiveMode ? ((liveStatus && liveStatus.evidenceCount) || 0) : doneSteps.filter(st => st.evidence).length;
+    const steps = isLiveMode ? liveSteps : demoSteps;
+
+    const liveScreenshots = (liveStatus && liveStatus.screenshots) || [];
+    const hasLiveScreenshot = liveScreenshots.length > 0;
+    const noLiveScreenshotYet = !hasLiveScreenshot;
+    const latestScreenshotUrl = hasLiveScreenshot ? liveScreenshots[liveScreenshots.length - 1] : '';
+
+    const liveSubtitle = isLiveMode
+      ? 'LIVE — FirstUser is actively browsing this website in a real cloud browser.'
+      : `Recorded demo using representative content for reclaim.buildneststudio.com — not a live analysis of ${websiteHost}.`;
+
+    const browserChipText = isLiveMode ? 'LIVE' : 'DEMO';
+    const browserChipStyle = {
+      fontFamily: "'IBM Plex Mono',monospace", fontSize: '10px', letterSpacing: '0.05em',
+      color: isLiveMode ? '#1C2405' : '#7A7D86',
+      background: isLiveMode ? SIGNAL : 'transparent',
+      border: isLiveMode ? 'none' : '1px solid #2E313B',
+      borderRadius: '5px', padding: '3px 7px', flexShrink: 0,
+    };
+
+    // -----------------------------------
+    // Report screen bindings
+    // -----------------------------------
+
+    const decision = (isLiveMode && s.liveResult) ? s.liveResult : null;
+
+    const DECISION_STYLES = {
+      yes: { label: 'Yes', color: '#3E7A34' },
+      no: { label: 'No', color: '#B23A3A' },
+      uncertain: { label: 'Uncertain', color: '#B8791F' },
+      incomplete: { label: 'Incomplete', color: '#6E7178' },
+    };
+    const CONFIDENCE_STYLES = {
+      high: { label: 'High confidence', color: '#D99B2B', bg: '#FBEFD6' },
+      medium: { label: 'Medium confidence', color: '#4C7EC9', bg: '#E4EDFB' },
+      low: { label: 'Low confidence', color: '#8C897E', bg: '#EAE7DF' },
+    };
+
+    let reportSourceLabel, confidenceLabel, confStyle, decisionKey, decisionHeadlineText, decisionReasonText;
+    let helped, blocked, hasRecommendation, recommendationText;
+    let evidenceFoundList, evidenceGapsList, journeyList, reportScreenshots;
+
+    if (isLiveMode) {
+      reportSourceLabel = `investigated: ${websiteHost}`;
+      decisionKey = decision ? (decision.decision || 'uncertain') : 'uncertain';
+      const dStyle = DECISION_STYLES[decisionKey] || DECISION_STYLES.uncertain;
+      decisionHeadlineText = dStyle.label;
+      const confKey = decision && decision.confidence ? decision.confidence : null;
+      confStyle = confKey ? (CONFIDENCE_STYLES[confKey] || CONFIDENCE_STYLES.low) : null;
+      confidenceLabel = confStyle ? confStyle.label : 'Confidence unavailable';
+      decisionReasonText = (decision && decision.reason) || (liveStatus && liveStatus.error) || 'Waiting for the final evaluation…';
+      helped = (decision && decision.what_helped) || [];
+      blocked = (decision && decision.what_blocked) || [];
+      hasRecommendation = !!(decision && decision.recommendation);
+      recommendationText = (decision && decision.recommendation) || '';
+      evidenceFoundList = ((decision && decision.evidence_trail) || []).map((item) => ({
+        claim: item.claim, why: item.why_it_matters, source: item.source,
+      }));
+      evidenceGapsList = ((decision && decision.evidence_missing) || []).map((claim) => ({ claim, why: '' }));
+      journeyList = ((decision && decision.journey) || []).map((rec) => ({
+        num: String(rec.step).padStart(2, '0'),
+        title: actionLabel(rec.action, rec.target_text),
+        desc: rec.reason,
+      }));
+      reportScreenshots = ((decision && decision.screenshots) || []).map((url) => ({ url }));
+    } else {
+      reportSourceLabel = 'investigated (demo): reclaim.buildneststudio.com';
+      decisionHeadlineText = 'Uncertain';
+      confStyle = CONFIDENCE_STYLES.high;
+      confidenceLabel = confStyle.label;
+      decisionReasonText = DEMO_SUMMARY;
+      helped = DEMO_HELPED;
+      blocked = DEMO_BLOCKED;
+      hasRecommendation = true;
+      recommendationText = DEMO_RECOMMENDATION;
+      evidenceFoundList = DEMO_EVIDENCE_FOUND;
+      evidenceGapsList = DEMO_EVIDENCE_GAPS;
+      journeyList = DEMO_JOURNEY;
+      reportScreenshots = [];
+    }
+
+    const decisionHeadlineStyle = {
+      fontFamily: "'Instrument Serif',serif", fontSize: '68px', fontWeight: 400, letterSpacing: '-0.01em',
+      lineHeight: 1, marginBottom: '24px',
+      color: isLiveMode ? ((DECISION_STYLES[decisionKey] || DECISION_STYLES.uncertain).color) : '#B8791F',
+    };
+    const confidenceChipStyle = {
+      display: 'inline-flex', alignItems: 'center', gap: '8px',
+      border: `1px solid ${confStyle ? confStyle.color : '#D99B2B'}`,
+      background: confStyle ? confStyle.bg : '#FBEFD6',
+      padding: '6px 16px 6px 11px', borderRadius: '8px',
+    };
+    const confidenceDotStyle = {
+      width: '8px', height: '8px', borderRadius: '50%',
+      background: confStyle ? confStyle.color : '#D99B2B',
+    };
+
+    return {
+      isCreate: s.screen === 'create', isLive: s.screen === 'live', isReport: s.screen === 'report',
+      stepLabelStyle: { create: stepLbl('create'), live: stepLbl('live'), report: stepLbl('report') },
+      goCreate: this.goCreate, goLive: this.goLive, goReport: this.goReport,
+
+      sessionBadgeStyle, sessionBadgeDotStyle, sessionBadgeText,
+
+      website: s.website, updateWebsite: this.updateWebsite,
+      persona: s.persona, updatePersona: this.updatePersona,
+      questions,
+      isTaskSelected: s.selectedQuestionId === 'task',
+      isCustomSelected: s.selectedQuestionId === 'custom',
+      taskInput: s.taskInput, updateTaskInput: this.updateTaskInput,
+      customMission: s.customMission, updateCustomMission: this.updateCustomMission,
+      showMissionPreview: s.selectedQuestionId !== 'custom' && !!missionText,
+      missionPreviewText: isLiveMode || isDemoMode && s.screen !== 'create' ? submittedMissionText : missionText,
+      startDisabled: !this.canStart(),
+      startButtonLabel: 'Start investigation →',
+      startButtonStyle: {
+        padding: '15px 26px', fontSize: '15px', fontWeight: 600, border: 'none', borderRadius: '10px',
+        background: this.canStart() ? SIGNAL : '#23262F',
+        color: this.canStart() ? '#1C2405' : FAINT_ON_DARK,
+        cursor: this.canStart() ? 'pointer' : 'default',
+      },
+      startTest: this.startTest,
+      startDemo: this.startDemo,
+      hasStartError: !!s.startError,
+      startErrorText: s.startError || '',
+
+      isDemoMode, isLiveMode,
+      statusDotStyle, statusText,
+      websiteHost,
+      currentUrl,
+      liveSubtitle,
+      browserChipText, browserChipStyle,
+      hasLiveError, liveErrorText,
+      hasLiveScreenshot, noLiveScreenshotYet, latestScreenshotUrl,
+
+      markerDotStyle: { position: 'absolute', left: PHASE_MARKER[demoPhase].left, top: PHASE_MARKER[demoPhase].top, width: '9px', height: '9px', borderRadius: '50%', background: SIGNAL, transition: 'left 0.7s ease, top 0.7s ease', zIndex: 3, animation: 'markerPing 1.8s ease-out infinite' },
+      markerRingStyle: { position: 'absolute', left: PHASE_MARKER[demoPhase].left, top: PHASE_MARKER[demoPhase].top, width: '9px', height: '9px', borderRadius: '50%', border: '1px solid #A9C94A', transition: 'left 0.7s ease, top 0.7s ease', zIndex: 2, transform: 'translate(0,0)' },
+      heroBoxStyle: highlightStyle('hero'),
+      pricingBoxStyle: highlightStyle('pricing'),
+      faqBoxStyle: highlightStyle('faq'),
+      howBoxStyle: highlightStyle('how'),
+      currentPhaseTitle,
+      currentLookingFor,
+      hasEvidenceMoment,
+      lastEvidenceText,
+      observationCount,
+      actionCount,
+      evidenceCount,
+      steps,
+      explorationDone, goToReport: this.goToReport,
+
+      submittedPersona,
+      reportSourceLabel,
+      confidenceChipStyle, confidenceDotStyle, confidenceLabel,
+      decisionHeadlineStyle, decisionHeadlineText, decisionReasonText,
+      helped, blocked,
+      hasRecommendation, recommendationText,
+      evidenceFoundList, evidenceGapsList,
+      journeyList,
+      hasReportScreenshots: reportScreenshots.length > 0,
+      reportScreenshots,
+      restart: this.restart,
+    };
+  }
+}
+
+</script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+{
+  "name": "firstuser",
+  "version": "0.1.0",
+  "private": true,
+  "description": "An AI browser agent prototype for evidence-based website evaluation.",
+  "type": "module",
+  "scripts": {
+    "start": "tsx index.ts",
+    "server": "tsx server.ts"
+  },
+  "dependencies": {
+    "@solarisdk/browser": "^0.1.1",
+    "dotenv": "^17.4.2",
+    "express": "^4.22.2",
+    "openai": "^6.49.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}

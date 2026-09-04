@@ -217,6 +217,15 @@ Current limitations:
 - It can miss evidence that is hidden behind unsupported interaction patterns.
 - It should not be used as the only source of truth for high-stakes decisions.
 
+## Case Study & Design
+
+FirstUser was developed as both a functional AI agent and a considered product experience.
+
+- 📖 [Read the FirstUser Case Study](docs/FirstUser-Case-Study.pdf)
+- 🎨 [View the FirstUser Brand & Design Guide](docs/FirstUser-Brand-Guide.pdf)
+
+The case study documents a real investigation into Reclaim from the perspective of a first-time visitor, while the design guide documents the visual identity and product principles behind FirstUser.
+
 ## Built with
 
 - [Solari](https://getsolari.com) for the cloud browser session

@@ -258,6 +258,16 @@
                   <div style="{{ s.labelStyle }}">{{ s.label }}</div>
                 </div>
               </sc-for>
+              <sc-if value="{{ showLiveActivityIndicator }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;align-items:center;gap:8px;animation:tickIn 0.35s ease both;">
+                  <div style="width:14px;flex-shrink:0;display:flex;align-items:center;gap:2px;">
+                    <div style="{{ liveDot0Style }}"></div>
+                    <div style="{{ liveDot1Style }}"></div>
+                    <div style="{{ liveDot2Style }}"></div>
+                  </div>
+                  <div style="font-size:12.5px;line-height:1.4;color:#7A7D86;font-style:italic;">{{ liveActivityText }}</div>
+                </div>
+              </sc-if>
             </div>
           </div>
 
@@ -825,6 +835,23 @@ class Component extends DCLogic {
     const evidenceCount = isLiveMode ? ((liveStatus && liveStatus.evidenceCount) || 0) : doneSteps.filter(st => st.evidence).length;
     const steps = isLiveMode ? liveSteps : demoSteps;
 
+    // Live activity indicator — fills the visual gap between journeyLog
+    // entries (a single exploration step can take 30-60s with no new log
+    // line). Only the coarse phases the backend actually reports
+    // (liveStatus.status) drive the copy; there is no finer-grained signal
+    // to fabricate a more specific message from between poll ticks.
+    const showLiveActivityIndicator = isLiveMode && !explorationDone && !hasLiveError;
+    const liveActivityLabels = {
+      starting: 'Opening the page…',
+      exploring: 'Investigating…',
+      evaluating: 'Evaluating the evidence…',
+    };
+    const liveActivityText = liveActivityLabels[liveStatus ? liveStatus.status : 'starting'] || 'Investigating…';
+    const liveActivityDotStyle = (delay) => ({
+      width: '3.5px', height: '3.5px', borderRadius: '50%', background: '#7A7D86',
+      animation: 'pulseDot 1.2s ease-in-out infinite', animationDelay: delay,
+    });
+
     const liveScreenshots = (liveStatus && liveStatus.screenshots) || [];
     const hasLiveScreenshot = liveScreenshots.length > 0;
     const noLiveScreenshotYet = !hasLiveScreenshot;
@@ -997,6 +1024,10 @@ class Component extends DCLogic {
       actionCount,
       evidenceCount,
       steps,
+      showLiveActivityIndicator, liveActivityText,
+      liveDot0Style: liveActivityDotStyle('0s'),
+      liveDot1Style: liveActivityDotStyle('0.2s'),
+      liveDot2Style: liveActivityDotStyle('0.4s'),
       explorationDone, goToReport: this.goToReport,
 
       submittedPersona,

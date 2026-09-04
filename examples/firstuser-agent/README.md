@@ -2,6 +2,10 @@
 
 **An autonomous AI agent that visits a website like a real first-time user and determines whether the available evidence is sufficient to answer a real-world question.**
 
+🌐 **Live demo:** https://firstuser.buildneststudio.com
+
+> FirstUser runs real browser investigations using Solari and OpenAI. LIVE investigations explore the website in a real cloud browser and generate an evidence-based report.
+
 FirstUser does not simply crawl pages or check whether UI elements work.
 
 It receives:
@@ -178,6 +182,12 @@ npm run server
 ```
 
 Then open `http://localhost:3000`. The server starts a real FirstUser session per request, exposes safe progress state for the Live Exploration screen, and serves the final evaluation to the Report screen. It never sends `SOLARI_API_KEY` or `OPENAI_API_KEY` to the browser.
+
+### Try the deployed version
+
+Visit:
+
+https://firstuser.buildneststudio.com
 
 Architecture:
 

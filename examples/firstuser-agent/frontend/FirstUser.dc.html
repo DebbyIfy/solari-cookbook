@@ -3,6 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-YM4XQG559T"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-YM4XQG559T');
+</script>
 <script src="./support.js"></script>
 </head>
 <body>
@@ -288,7 +296,7 @@
           <div style="display:flex;align-items:baseline;gap:22px;">
             <span>persona: {{ submittedPersona }}</span>
             <sc-if value="{{ hasDownloadableReport }}" hint-placeholder-val="{{ false }}">
-              <a href="{{ reportPdfUrl }}" download="{{ reportPdfFilename }}" style="text-decoration:underline;">Download report ↓</a>
+              <a href="{{ reportPdfUrl }}" download="{{ reportPdfFilename }}" onClick="{{ trackReportDownload }}" style="text-decoration:underline;">Download report ↓</a>
             </sc-if>
           </div>
         </div>
@@ -479,6 +487,18 @@ function actionLabel(action, targetText) {
   return 'Explored the page';
 }
 
+// Product-usage analytics only — never passed URL/persona/mission/evidence/
+// error content. Fails silently if gtag is missing, blocked, or throws.
+function trackEvent(name, params = {}) {
+  try {
+    if (typeof window.gtag === 'function') {
+      window.gtag('event', name, params);
+    }
+  } catch (err) {
+    // analytics is best-effort only — never let it affect the app
+  }
+}
+
 class Component extends DCLogic {
   state = {
     screen: 'create',
@@ -510,6 +530,11 @@ class Component extends DCLogic {
 
     lightboxUrl: null,
   };
+
+  // Analytics-only guard (not reactive state) — ensures investigation_completed
+  // / investigation_failed fire once per session even if two poll ticks both
+  // observe the terminal status (see pollStatus()). Reset per session in startTest().
+  outcomeTracked = false;
 
   componentWillUnmount() {
     if (this.demoTimer) clearInterval(this.demoTimer);
@@ -589,9 +614,13 @@ class Component extends DCLogic {
     }
 
     if (!response.ok) {
+      if (response.status === 429) trackEvent('live_investigation_blocked', { reason: 'rate_limit' });
       this.setState({ startError: (data && data.error) || 'Could not start the investigation.' });
       return;
     }
+
+    trackEvent('investigation_started', { mode: 'live' });
+    this.outcomeTracked = false;
 
     this.setState({
       runMode: 'live',
@@ -626,7 +655,19 @@ class Component extends DCLogic {
 
     if (data.status === 'completed' || data.status === 'error') {
       if (this.pollTimer) clearInterval(this.pollTimer);
-      if (data.status === 'completed') this.fetchResult();
+
+      // Guards against a concurrent poll tick double-firing the terminal
+      // analytics event (e.g. the interval firing again before an earlier,
+      // slow /status request has resolved). No `await` between the check
+      // and the write below, so this is race-free despite both being async.
+      if (this.outcomeTracked) return;
+      this.outcomeTracked = true;
+
+      if (data.status === 'error') {
+        trackEvent('investigation_failed', { mode: 'live' });
+      } else {
+        this.fetchResult();
+      }
     }
   };
 
@@ -639,6 +680,7 @@ class Component extends DCLogic {
       if (!response.ok) return;
       const data = await response.json();
       this.setState({ liveResult: data });
+      trackEvent('investigation_completed', { verdict: data.decision });
     } catch (err) {
       // report screen falls back to liveStatus fields if this never arrives
     }
@@ -649,6 +691,8 @@ class Component extends DCLogic {
   // -----------------------------------
 
   startDemo = () => {
+    trackEvent('demo_started', { mode: 'demo' });
+
     const submitted = {
       website: this.state.website.trim() || 'yourwebsite.com',
       persona: this.state.persona.trim() || DEFAULT_PERSONA,
@@ -686,7 +730,13 @@ class Component extends DCLogic {
   closeLightbox = () => this.setState({ lightboxUrl: null });
   stopLightboxClose = (e) => e.stopPropagation();
 
-  goToReport = () => this.setState({ screen: 'report', maxScreen: 2 });
+  goToReport = () => {
+    // "View findings" is shared with the demo simulation (same explorationDone
+    // gate) — only a real LIVE session should count as this product event.
+    if (this.state.runMode === 'live') trackEvent('findings_viewed', { mode: 'live' });
+    this.setState({ screen: 'report', maxScreen: 2 });
+  };
+  trackReportDownload = () => trackEvent('report_downloaded', { mode: 'live' });
   goCreate = () => this.setState({ screen: 'create' });
   goLive = () => this.setState((s) => (s.maxScreen >= 1 ? { screen: 'live' } : null));
   goReport = () => this.setState((s) => (s.maxScreen >= 2 ? { screen: 'report' } : null));
@@ -1033,6 +1083,7 @@ class Component extends DCLogic {
       submittedPersona,
       reportSourceLabel,
       hasDownloadableReport, reportPdfUrl, reportPdfFilename,
+      trackReportDownload: this.trackReportDownload,
       confidenceDotStyle, confidenceLabel, confidenceMetaLabel,
       decisionHeadlineStyle, decisionHeadlineText, decisionReasonText,
       showUncertaintyNote, uncertaintyNoteText,

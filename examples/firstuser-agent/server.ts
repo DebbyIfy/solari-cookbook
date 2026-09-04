@@ -24,6 +24,7 @@ import {
   type ResearchRules,
 } from "./agent.ts"
 import { renderReportPdf, type ReportPdfInput } from "./pdf-report.ts"
+import { rateLimitTestCreation } from "./rate-limit.ts"
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const FRONTEND_DIR = path.join(__dirname, "frontend")
@@ -320,9 +321,14 @@ function buildReportFilename(websiteUrl: string, date: Date): string {
 }
 
 const app = express()
+// Render (and most PaaS proxies) terminate the connection in front of this
+// process, so req.ip would otherwise resolve to the proxy's address for
+// every request — trust proxy lets Express read the real client IP from
+// X-Forwarded-For, which rate-limit.ts needs to key its per-IP counters.
+app.set("trust proxy", true)
 app.use(express.json())
 
-app.post("/api/tests", (req, res) => {
+app.post("/api/tests", rateLimitTestCreation, (req, res) => {
   const { websiteUrl, persona, goal, researchRules } = req.body ?? {}
 
   if (typeof websiteUrl !== "string" || !isValidHttpUrl(websiteUrl)) {

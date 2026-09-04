@@ -83,6 +83,33 @@
             </div>
           </sc-if>
 
+          <div style="margin-bottom:20px;">
+            <div style="font-size:11px;font-weight:600;color:#7A7D86;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;">Research rules</div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <label style="display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid #DCD8CC;border-radius:10px;background:#F4F1EA;cursor:pointer;">
+                <input type="checkbox" checked="{{ researchRuleEvidenceOnly }}" onChange="{{ toggleEvidenceOnly }}" style="width:15px;height:15px;margin-top:2px;flex-shrink:0;accent-color:#A9C94A;cursor:pointer;" />
+                <div>
+                  <div style="font-size:13.5px;font-weight:600;color:#1B1B18;margin-bottom:2px;">Evidence only</div>
+                  <div style="font-size:12px;color:#6E7178;line-height:1.4;">Use only evidence from the website. Don't assume or invent information that isn't available on the site.</div>
+                </div>
+              </label>
+              <label style="display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid #DCD8CC;border-radius:10px;background:#F4F1EA;cursor:pointer;">
+                <input type="checkbox" checked="{{ researchRuleExploreBeforeDeciding }}" onChange="{{ toggleExploreBeforeDeciding }}" style="width:15px;height:15px;margin-top:2px;flex-shrink:0;accent-color:#A9C94A;cursor:pointer;" />
+                <div>
+                  <div style="font-size:13.5px;font-weight:600;color:#1B1B18;margin-bottom:2px;">Explore before deciding</div>
+                  <div style="font-size:12px;color:#6E7178;line-height:1.4;">Explore the website thoroughly enough to understand the core product before deciding whether more information is needed.</div>
+                </div>
+              </label>
+              <label style="display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid #DCD8CC;border-radius:10px;background:#F4F1EA;cursor:pointer;">
+                <input type="checkbox" checked="{{ researchRuleAllowUncertain }}" onChange="{{ toggleAllowUncertain }}" style="width:15px;height:15px;margin-top:2px;flex-shrink:0;accent-color:#A9C94A;cursor:pointer;" />
+                <div>
+                  <div style="font-size:13.5px;font-weight:600;color:#1B1B18;margin-bottom:2px;">Allow UNCERTAIN</div>
+                  <div style="font-size:12px;color:#6E7178;line-height:1.4;">If there isn't enough evidence to make a confident decision, return UNCERTAIN and explain exactly what is missing.</div>
+                </div>
+              </label>
+            </div>
+          </div>
+
           <div style="display:flex;flex-direction:column;gap:20px;">
             <sc-if value="{{ showMissionPreview }}" hint-placeholder-val="{{ false }}">
               <div style="position:relative;background:#EEF6D6;border:1px solid #B9CC85;border-radius:14px;padding:22px 24px 20px;">
@@ -248,21 +275,30 @@
       <div style="width:100%;max-width:840px;">
         <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:24px;font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:#6E7178;">
           <span>{{ reportSourceLabel }}</span>
-          <span>persona: {{ submittedPersona }}</span>
+          <div style="display:flex;align-items:baseline;gap:22px;">
+            <span>persona: {{ submittedPersona }}</span>
+            <sc-if value="{{ hasDownloadableReport }}" hint-placeholder-val="{{ false }}">
+              <a href="{{ reportPdfUrl }}" download="{{ reportPdfFilename }}" style="text-decoration:underline;">Download report ↓</a>
+            </sc-if>
+          </div>
         </div>
 
         <div style="background:#F4F1EA;color:#1B1B18;border-radius:24px;padding:56px 60px;box-shadow:0 30px 70px rgba(0,0,0,0.35);">
 
           <div style="font-family:'Instrument Serif',serif;font-style:italic;font-size:17px;color:#77746A;line-height:1.55;margin-bottom:36px;">{{ missionPreviewText }}</div>
 
-          <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px;">
-            <div style="{{ confidenceChipStyle }}">
-              <div style="{{ confidenceDotStyle }}"></div>
-              <span style="font-size:13px;font-weight:600;letter-spacing:0.02em;">{{ confidenceLabel }}</span>
-            </div>
-          </div>
+          <div style="font-size:11px;font-weight:600;color:#8C897E;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;">Verdict</div>
           <div style="{{ decisionHeadlineStyle }}">{{ decisionHeadlineText }}</div>
-          <div style="font-size:19px;line-height:1.55;margin-bottom:48px;max-width:620px;">{{ decisionReasonText }}</div>
+          <div style="font-size:19px;line-height:1.55;margin-bottom:20px;max-width:620px;">{{ decisionReasonText }}</div>
+
+          <sc-if value="{{ showUncertaintyNote }}" hint-placeholder-val="{{ false }}">
+            <div style="font-size:14.5px;line-height:1.6;color:#6E7178;max-width:620px;margin-bottom:20px;">{{ uncertaintyNoteText }}</div>
+          </sc-if>
+
+          <div style="display:inline-flex;align-items:center;gap:8px;margin-bottom:48px;">
+            <div style="{{ confidenceDotStyle }}"></div>
+            <span style="font-size:11px;font-weight:600;color:#8C897E;text-transform:uppercase;letter-spacing:0.08em;">{{ confidenceMetaLabel }}</span>
+          </div>
 
           <div style="height:1px;background:#DCD8CC;margin-bottom:40px;"></div>
 
@@ -301,14 +337,15 @@
           <div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#8C897E;margin-bottom:20px;">Evidence trail</div>
           <div style="display:flex;flex-direction:column;gap:14px;margin-bottom:24px;">
             <sc-for list="{{ evidenceFoundList }}" as="e" hint-placeholder-count="5">
-              <div style="display:flex;gap:18px;border:1px solid #DCD8CC;border-radius:16px;padding:16px 18px;align-items:flex-start;">
-                <div style="position:relative;width:88px;height:60px;border-radius:10px;flex-shrink:0;background:repeating-linear-gradient(135deg,#EFECE3,#EFECE3 6px,#E2DFD2 6px,#E2DFD2 12px);">
-                  <div style="position:absolute;top:6px;right:6px;width:8px;height:8px;border-radius:50%;background:#C7F36B;box-shadow:0 0 0 3px rgba(199,243,107,0.35);"></div>
-                </div>
-                <div>
-                  <div style="font-size:14.5px;font-weight:600;line-height:1.4;margin-bottom:4px;">{{ e.claim }}</div>
-                  <div style="font-size:12.5px;color:#6E7178;line-height:1.45;margin-bottom:7px;">{{ e.why }}</div>
-                  <div style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:#6E7178;border:1px solid #DCD8CC;border-radius:5px;padding:2px 7px;display:inline-block;">{{ e.source }}</div>
+              <div style="border:1px solid #DCD8CC;border-radius:16px;padding:18px 20px;">
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:#9C988C;letter-spacing:0.06em;margin-bottom:9px;">EVIDENCE {{ e.num }}</div>
+                <div style="font-size:14.5px;font-weight:600;line-height:1.4;margin-bottom:11px;">{{ e.claim }}</div>
+                <div style="font-size:12.5px;color:#6E7178;line-height:1.5;margin-bottom:13px;"><span style="font-weight:600;color:#8C897E;">Why it matters: </span>{{ e.why }}</div>
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;">
+                  <div style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:#6E7178;border:1px solid #DCD8CC;border-radius:5px;padding:2px 7px;display:inline-block;">Observed on: {{ e.source }}</div>
+                  <sc-if value="{{ e.hasScreenshot }}" hint-placeholder-val="{{ false }}">
+                    <span onClick="{{ e.viewEvidence }}" style="font-size:12.5px;font-weight:600;color:#6B7A3E;cursor:pointer;text-decoration:underline;white-space:nowrap;">View source evidence →</span>
+                  </sc-if>
                 </div>
               </div>
             </sc-for>
@@ -340,21 +377,19 @@
             </sc-for>
           </div>
 
-          <sc-if value="{{ hasReportScreenshots }}" hint-placeholder-val="{{ false }}">
-            <div style="height:1px;background:#DCD8CC;margin:40px 0;"></div>
-            <div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#8C897E;margin-bottom:20px;">Screenshots</div>
-            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
-              <sc-for list="{{ reportScreenshots }}" as="shot" hint-placeholder-count="6">
-                <img src="{{ shot.url }}" style="width:100%;border-radius:10px;border:1px solid #DCD8CC;display:block;" />
-              </sc-for>
-            </div>
-          </sc-if>
         </div>
 
         <div style="display:flex;justify-content:center;margin-top:40px;">
           <button onClick="{{ restart }}" style="padding:12px 22px;font-size:14px;font-weight:600;border:1px solid #33363F;border-radius:10px;background:transparent;color:#EDEBE3;cursor:pointer;">Run another investigation</button>
         </div>
       </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ hasLightbox }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeLightbox }}" style="position:fixed;inset:0;background:rgba(10,11,14,0.86);display:flex;align-items:center;justify-content:center;padding:48px;z-index:100;cursor:zoom-out;animation:fadeUp 0.2s ease both;">
+      <div style="position:absolute;top:24px;right:28px;font-size:13px;font-weight:600;color:#9A9DA6;">Close ✕</div>
+      <img src="{{ lightboxUrl }}" onClick="{{ stopLightboxClose }}" style="max-width:100%;max-height:100%;border-radius:12px;box-shadow:0 30px 80px rgba(0,0,0,0.5);display:block;cursor:default;" />
     </div>
   </sc-if>
 
@@ -444,6 +479,12 @@ class Component extends DCLogic {
     customMission: EXAMPLE_MISSION,
     taskInput: '',
 
+    // Research rules — safeguards on FirstUser's methodology, not advanced
+    // config. All default ON (the current, safest FirstUser behavior).
+    researchRuleEvidenceOnly: true,
+    researchRuleExploreBeforeDeciding: true,
+    researchRuleAllowUncertain: true,
+
     runMode: null, // 'live' | 'demo'
     submitted: null, // { website, persona, mission } snapshot at start time
 
@@ -456,6 +497,8 @@ class Component extends DCLogic {
     liveStatus: null,
     liveResult: null,
     startError: null,
+
+    lightboxUrl: null,
   };
 
   componentWillUnmount() {
@@ -468,6 +511,9 @@ class Component extends DCLogic {
   updatePersona = (e) => this.setState({ persona: e.target.value });
   updateCustomMission = (e) => this.setState({ customMission: e.target.value });
   updateTaskInput = (e) => this.setState({ taskInput: e.target.value });
+  toggleEvidenceOnly = (e) => this.setState({ researchRuleEvidenceOnly: e.target.checked });
+  toggleExploreBeforeDeciding = (e) => this.setState({ researchRuleExploreBeforeDeciding: e.target.checked });
+  toggleAllowUncertain = (e) => this.setState({ researchRuleAllowUncertain: e.target.checked });
 
   missionText() {
     const s = this.state;
@@ -513,6 +559,11 @@ class Component extends DCLogic {
           websiteUrl: submitted.website,
           persona: submitted.persona,
           goal: submitted.mission,
+          researchRules: {
+            evidenceOnly: this.state.researchRuleEvidenceOnly,
+            exploreBeforeDeciding: this.state.researchRuleExploreBeforeDeciding,
+            allowUncertain: this.state.researchRuleAllowUncertain,
+          },
         }),
       });
     } catch (err) {
@@ -621,6 +672,10 @@ class Component extends DCLogic {
   // NAVIGATION
   // -----------------------------------
 
+  openLightbox = (url) => { if (url) this.setState({ lightboxUrl: url }); };
+  closeLightbox = () => this.setState({ lightboxUrl: null });
+  stopLightboxClose = (e) => e.stopPropagation();
+
   goToReport = () => this.setState({ screen: 'report', maxScreen: 2 });
   goCreate = () => this.setState({ screen: 'create' });
   goLive = () => this.setState((s) => (s.maxScreen >= 1 ? { screen: 'live' } : null));
@@ -640,6 +695,7 @@ class Component extends DCLogic {
       liveStatus: null,
       liveResult: null,
       startError: null,
+      lightboxUrl: null,
     });
   };
 
@@ -793,6 +849,13 @@ class Component extends DCLogic {
 
     const decision = (isLiveMode && s.liveResult) ? s.liveResult : null;
 
+    // Downloadable only for a completed LIVE investigation — demo runs never
+    // touch the backend, so there is no session to export a PDF from, which
+    // also guarantees demo content can never be downloaded as a real report.
+    const hasDownloadableReport = isLiveMode && !!decision && !hasLiveError;
+    const reportPdfUrl = s.testId ? `/api/tests/${s.testId}/report.pdf` : '';
+    const reportPdfFilename = `firstuser-report-${websiteHost.replace(/[^a-z0-9]+/gi, '-').replace(/^-+|-+$/g, '').toLowerCase()}-${new Date().toISOString().slice(0, 10)}.pdf`;
+
     const DECISION_STYLES = {
       yes: { label: 'Yes', color: '#3E7A34' },
       no: { label: 'No', color: '#B23A3A' },
@@ -805,16 +868,16 @@ class Component extends DCLogic {
       low: { label: 'Low confidence', color: '#8C897E', bg: '#EAE7DF' },
     };
 
-    let reportSourceLabel, confidenceLabel, confStyle, decisionKey, decisionHeadlineText, decisionReasonText;
+    let reportSourceLabel, confidenceLabel, confStyle, decisionKey, confKey, decisionHeadlineText, decisionReasonText;
     let helped, blocked, hasRecommendation, recommendationText;
-    let evidenceFoundList, evidenceGapsList, journeyList, reportScreenshots;
+    let evidenceFoundList, evidenceGapsList, journeyList;
 
     if (isLiveMode) {
       reportSourceLabel = `investigated: ${websiteHost}`;
       decisionKey = decision ? (decision.decision || 'uncertain') : 'uncertain';
       const dStyle = DECISION_STYLES[decisionKey] || DECISION_STYLES.uncertain;
       decisionHeadlineText = dStyle.label;
-      const confKey = decision && decision.confidence ? decision.confidence : null;
+      confKey = decision && decision.confidence ? decision.confidence : null;
       confStyle = confKey ? (CONFIDENCE_STYLES[confKey] || CONFIDENCE_STYLES.low) : null;
       confidenceLabel = confStyle ? confStyle.label : 'Confidence unavailable';
       decisionReasonText = (decision && decision.reason) || (liveStatus && liveStatus.error) || 'Waiting for the final evaluation…';
@@ -822,8 +885,15 @@ class Component extends DCLogic {
       blocked = (decision && decision.what_blocked) || [];
       hasRecommendation = !!(decision && decision.recommendation);
       recommendationText = (decision && decision.recommendation) || '';
+      // Screenshots are captured one per observation step (in step order), so an
+      // evidence item's step number maps directly to its index in that array —
+      // this is the only honest way to attach a real screenshot to a claim.
+      const rawScreenshotUrls = (decision && decision.screenshots) || [];
       evidenceFoundList = ((decision && decision.evidence_trail) || []).map((item) => ({
-        claim: item.claim, why: item.why_it_matters, source: item.source,
+        claim: item.claim,
+        why: item.why_it_matters,
+        source: item.source,
+        screenshotUrl: item.observed_at_step ? (rawScreenshotUrls[item.observed_at_step - 1] || null) : null,
       }));
       evidenceGapsList = ((decision && decision.evidence_missing) || []).map((claim) => ({ claim, why: '' }));
       journeyList = ((decision && decision.journey) || []).map((rec) => ({
@@ -831,10 +901,11 @@ class Component extends DCLogic {
         title: actionLabel(rec.action, rec.target_text),
         desc: rec.reason,
       }));
-      reportScreenshots = ((decision && decision.screenshots) || []).map((url) => ({ url }));
     } else {
       reportSourceLabel = 'investigated (demo): reclaim.buildneststudio.com';
+      decisionKey = 'uncertain';
       decisionHeadlineText = 'Uncertain';
+      confKey = 'high';
       confStyle = CONFIDENCE_STYLES.high;
       confidenceLabel = confStyle.label;
       decisionReasonText = DEMO_SUMMARY;
@@ -842,22 +913,29 @@ class Component extends DCLogic {
       blocked = DEMO_BLOCKED;
       hasRecommendation = true;
       recommendationText = DEMO_RECOMMENDATION;
-      evidenceFoundList = DEMO_EVIDENCE_FOUND;
+      // No real screenshots exist for the recorded demo — evidence stays text-only.
+      evidenceFoundList = DEMO_EVIDENCE_FOUND.map((e) => ({ ...e, screenshotUrl: null }));
       evidenceGapsList = DEMO_EVIDENCE_GAPS;
       journeyList = DEMO_JOURNEY;
-      reportScreenshots = [];
     }
+
+    evidenceFoundList = evidenceFoundList.map((e, i) => ({
+      ...e,
+      num: String(i + 1).padStart(2, '0'),
+      hasScreenshot: !!e.screenshotUrl,
+      viewEvidence: () => this.openLightbox(e.screenshotUrl),
+    }));
+
+    const showUncertaintyNote = decisionKey === 'uncertain' && confKey === 'high';
+    const uncertaintyNoteText = isLiveMode
+      ? 'FirstUser found enough evidence to confidently conclude that the information available on the website is insufficient to answer this question with certainty.'
+      : 'FirstUser found enough evidence to confidently conclude that the available information is insufficient to make a defensible financial decision.';
+    const confidenceMetaLabel = confStyle ? `${confStyle.label} in this conclusion` : 'Confidence unavailable';
 
     const decisionHeadlineStyle = {
       fontFamily: "'Instrument Serif',serif", fontSize: '68px', fontWeight: 400, letterSpacing: '-0.01em',
       lineHeight: 1, marginBottom: '24px',
       color: isLiveMode ? ((DECISION_STYLES[decisionKey] || DECISION_STYLES.uncertain).color) : '#B8791F',
-    };
-    const confidenceChipStyle = {
-      display: 'inline-flex', alignItems: 'center', gap: '8px',
-      border: `1px solid ${confStyle ? confStyle.color : '#D99B2B'}`,
-      background: confStyle ? confStyle.bg : '#FBEFD6',
-      padding: '6px 16px 6px 11px', borderRadius: '8px',
     };
     const confidenceDotStyle = {
       width: '8px', height: '8px', borderRadius: '50%',
@@ -878,6 +956,9 @@ class Component extends DCLogic {
       isCustomSelected: s.selectedQuestionId === 'custom',
       taskInput: s.taskInput, updateTaskInput: this.updateTaskInput,
       customMission: s.customMission, updateCustomMission: this.updateCustomMission,
+      researchRuleEvidenceOnly: s.researchRuleEvidenceOnly, toggleEvidenceOnly: this.toggleEvidenceOnly,
+      researchRuleExploreBeforeDeciding: s.researchRuleExploreBeforeDeciding, toggleExploreBeforeDeciding: this.toggleExploreBeforeDeciding,
+      researchRuleAllowUncertain: s.researchRuleAllowUncertain, toggleAllowUncertain: this.toggleAllowUncertain,
       showMissionPreview: s.selectedQuestionId !== 'custom' && !!missionText,
       missionPreviewText: isLiveMode || isDemoMode && s.screen !== 'create' ? submittedMissionText : missionText,
       startDisabled: !this.canStart(),
@@ -920,15 +1001,20 @@ class Component extends DCLogic {
 
       submittedPersona,
       reportSourceLabel,
-      confidenceChipStyle, confidenceDotStyle, confidenceLabel,
+      hasDownloadableReport, reportPdfUrl, reportPdfFilename,
+      confidenceDotStyle, confidenceLabel, confidenceMetaLabel,
       decisionHeadlineStyle, decisionHeadlineText, decisionReasonText,
+      showUncertaintyNote, uncertaintyNoteText,
       helped, blocked,
       hasRecommendation, recommendationText,
       evidenceFoundList, evidenceGapsList,
       journeyList,
-      hasReportScreenshots: reportScreenshots.length > 0,
-      reportScreenshots,
       restart: this.restart,
+
+      hasLightbox: !!s.lightboxUrl,
+      lightboxUrl: s.lightboxUrl || '',
+      closeLightbox: this.closeLightbox,
+      stopLightboxClose: this.stopLightboxClose,
     };
   }
 }

@@ -110,17 +110,24 @@ test("hidden or transparent large elements are ignored even if geometrically ful
 // overlay" on a page that had none.
 // -----------------------------------
 
-test("large decorative background element behind real content is NOT detected as blocking", () => {
-  const decorativeHeroWrapper = candidate({
-    rect: { left: 0, top: 0, right: 1280, bottom: 800, width: 1280, height: 800 },
-    text: "Failed payments in Naira aren't gone. They're stuck. See what it costs How it works",
-    // Passes every existing geometry/visibility check, but elementFromPoint()
-    // never reports it (or a descendant of it) as topmost — nothing about
-    // it was actually painted over the visitor's view.
+// Real incident, not a hypothetical: this is the exact element FirstUser
+// flagged as a "blocking overlay" on reclaim.buildneststudio.com, captured
+// via a live diagnostic against the actual page (2026-09-04). It is a
+// purely decorative hero background div —
+//   <div class="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[560px]
+//     bg-[radial-gradient(ellipse_at_top,_rgba(31,157,109,0.14),_transparent_60%)]">
+// — `position: absolute`, `z-index: -10`, `pointer-events: none`, no text
+// of its own, covering 77.8% of the viewport. All 3 sample points hit the
+// real hero content wrapper instead (a sibling rendered on top of it, not
+// a descendant), so topmostHits correctly comes back 0.
+test("real incident — Reclaim's decorative hero background div is NOT detected as blocking", () => {
+  const reclaimHeroBackgroundDiv = candidate({
+    rect: { left: 0, top: 65, right: 1280, bottom: 625, width: 1280, height: 560 },
+    text: "",
     topmostHits: 0,
   })
 
-  const result = detectBlockingOverlay([decorativeHeroWrapper], VIEWPORT)
+  const result = detectBlockingOverlay([reclaimHeroBackgroundDiv], VIEWPORT)
 
   assert.equal(result.present, false)
 })

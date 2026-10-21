@@ -244,7 +244,7 @@
           <sc-if value="{{ isLiveMode }}" hint-placeholder-val="{{ false }}">
           <div class="fu-shot" style="position:relative;background:#000;min-height:360px;display:flex;align-items:center;justify-content:center;">
             <sc-if value="{{ hasLiveScreenshot }}" hint-placeholder-val="{{ false }}">
-              <img src="{{ latestScreenshotUrl }}" style="width:100%;display:block;" />
+              <img loading="lazy" src="{{ latestScreenshotUrl }}" style="width:100%;display:block;" />
             </sc-if>
             <sc-if value="{{ noLiveScreenshotYet }}" hint-placeholder-val="{{ true }}">
               <div style="color:#6E7178;font-size:13px;font-family:'IBM Plex Mono',monospace;padding:80px 0;">Waiting for the first observation…</div>
@@ -440,7 +440,7 @@
   <sc-if value="{{ hasLightbox }}" hint-placeholder-val="{{ false }}">
     <div onClick="{{ closeLightbox }}" class="fu-lightbox" style="position:fixed;inset:0;background:rgba(10,11,14,0.86);display:flex;align-items:center;justify-content:center;padding:48px;z-index:100;cursor:zoom-out;animation:fadeUp 0.2s ease both;">
       <div style="position:absolute;top:24px;right:28px;font-size:13px;font-weight:600;color:#9A9DA6;">Close ✕</div>
-      <img src="{{ lightboxUrl }}" onClick="{{ stopLightboxClose }}" style="max-width:100%;max-height:100%;border-radius:12px;box-shadow:0 30px 80px rgba(0,0,0,0.5);display:block;cursor:default;" />
+      <img loading="lazy" src="{{ lightboxUrl }}" onClick="{{ stopLightboxClose }}" style="max-width:100%;max-height:100%;border-radius:12px;box-shadow:0 30px 80px rgba(0,0,0,0.5);display:block;cursor:default;" />
     </div>
   </sc-if>
 

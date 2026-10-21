@@ -479,6 +479,8 @@ const MUTED_ON_DARK = '#9A9DA6';
 const FAINT_ON_DARK = '#4E5058';
 
 const POLL_INTERVAL_MS = 1500;
+// ~30s of consecutive failed status polls before the session is declared lost.
+const MAX_CONSECUTIVE_POLL_FAILURES = 20;
 
 function actionLabel(action, targetText) {
   if (action === 'click_link' || action === 'click_button') return targetText ? `Opened "${targetText}"` : 'Opened a linked section';
@@ -621,6 +623,7 @@ class Component extends DCLogic {
 
     trackEvent('investigation_started', { mode: 'live' });
     this.outcomeTracked = false;
+    this.pollFailures = 0;
 
     this.setState({
       runMode: 'live',
@@ -645,12 +648,53 @@ class Component extends DCLogic {
     try {
       response = await fetch(`/api/tests/${testId}/status`);
     } catch (err) {
-      return; // transient network hiccup — try again on the next tick
+      this.recordPollFailure(); // transient network hiccup — try again on the next tick
+      return;
     }
 
-    if (!response.ok) return;
+    // The server keeps sessions in memory, so a 404 means it restarted and
+    // this investigation is gone for good — retrying cannot bring it back.
+    if (response.status === 404) {
+      this.failLiveSession('FirstUser lost this investigation because the server restarted. Please start it again.');
+      return;
+    }
 
-    const data = await response.json();
+    if (!response.ok) {
+      this.recordPollFailure();
+      return;
+    }
+
+    let data;
+    try {
+      data = await response.json();
+    } catch (err) {
+      this.recordPollFailure();
+      return;
+    }
+
+    this.pollFailures = 0;
+    this.applyLiveStatus(data);
+  };
+
+  recordPollFailure = () => {
+    this.pollFailures = (this.pollFailures || 0) + 1;
+    if (this.pollFailures >= MAX_CONSECUTIVE_POLL_FAILURES) {
+      this.failLiveSession('Lost connection to the FirstUser server. Please check your connection and start the investigation again.');
+    }
+  };
+
+  /** Ends a live session client-side when the server can no longer report on it. */
+  failLiveSession = (message) => {
+    const previous = this.state.liveStatus || {};
+    this.applyLiveStatus({
+      ...previous,
+      status: 'error',
+      error: message,
+      currentActivity: 'Investigation failed',
+    });
+  };
+
+  applyLiveStatus = (data) => {
     this.setState({ liveStatus: data });
 
     if (data.status === 'completed' || data.status === 'error') {

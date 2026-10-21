@@ -360,6 +360,33 @@ export class WebsiteUnreachableError extends Error {
   }
 }
 
+/** Raised when the Solari cloud browser does not start within BROWSER_START_TIMEOUT_MS. */
+export class BrowserStartTimeoutError extends Error {
+  constructor(timeoutMs: number) {
+    super(`FirstUser's cloud browser did not start within ${timeoutMs / 1000}s.`)
+    this.name = "BrowserStartTimeoutError"
+  }
+}
+
+/** Upper bound for solari.launch() + newPage(). Without it a stalled launch hangs the session forever. */
+export const BROWSER_START_TIMEOUT_MS = 60_000
+
+/** Upper bound for the first page.goto() of the target website. */
+export const FIRST_NAVIGATION_TIMEOUT_MS = 60_000
+
+/**
+ * Rejects with `makeError()` if `promise` has not settled within `ms`.
+ * The underlying promise keeps running; callers that own a resource it may
+ * still produce (e.g. a late-launching browser) must clean it up themselves.
+ */
+export function withTimeout<T>(promise: Promise<T>, ms: number, makeError: () => Error): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined
+  const timeout = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(makeError()), ms)
+  })
+  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer))
+}
+
 export interface FirstUserHooks {
   onLog?: (message: string) => void
   onSessionStarted?: (config: FirstUserConfig) => void
@@ -634,14 +661,38 @@ Return ONLY valid JSON:
     return result
   }
 
-  const browser = await solari.launch()
+  // Launch sits outside the main try/finally (there is no browser to close
+  // yet), so it reports its own failures via onError — otherwise a failed or
+  // stalled launch would leave the caller's session stuck on "starting".
+  const launching = solari.launch()
+  let browser: any
 
   try {
-    let page: any
+    browser = await withTimeout(
+      launching,
+      BROWSER_START_TIMEOUT_MS,
+      () => new BrowserStartTimeoutError(BROWSER_START_TIMEOUT_MS)
+    )
+  } catch (error) {
+    // If a timed-out launch eventually succeeds, release that cloud session.
+    launching.then((lateBrowser: any) => lateBrowser.close()).catch(() => {})
+    hooks.onError?.(error as Error)
+    throw error
+  }
+
+  try {
+    const page: any = await withTimeout(
+      browser.newPage(),
+      BROWSER_START_TIMEOUT_MS,
+      () => new BrowserStartTimeoutError(BROWSER_START_TIMEOUT_MS)
+    )
 
     try {
-      page = await browser.newPage()
-      await page.goto(testConfig.websiteUrl)
+      await withTimeout(
+        page.goto(testConfig.websiteUrl),
+        FIRST_NAVIGATION_TIMEOUT_MS,
+        () => new Error(`Navigation timed out after ${FIRST_NAVIGATION_TIMEOUT_MS / 1000}s`)
+      )
     } catch (error) {
       throw new WebsiteUnreachableError(testConfig.websiteUrl, error)
     }

@@ -20,6 +20,7 @@ import {
   runFirstUserTest,
   WebsiteUnreachableError,
   LlmBudgetExceededError,
+  BrowserStartTimeoutError,
   type FirstUserResult,
   type ResearchRules,
 } from "./agent.ts"
@@ -86,6 +87,9 @@ function describeAction(action: string, targetText: string | null) {
 function describeError(error: unknown): string {
   if (error instanceof WebsiteUnreachableError) {
     return "The website could not be reached. Check the URL and try again."
+  }
+  if (error instanceof BrowserStartTimeoutError) {
+    return "The cloud browser took too long to start. Please try again in a moment."
   }
   if (error instanceof LlmBudgetExceededError) {
     return "FirstUser's exploration budget was used up before it could finish."

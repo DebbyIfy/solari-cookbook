@@ -11,6 +11,8 @@
 
 import "dotenv/config"
 import express from "express"
+import { SolariError } from "@solarisdk/browser"
+import OpenAI from "openai"
 import { randomUUID } from "node:crypto"
 import { existsSync } from "node:fs"
 import path from "node:path"
@@ -93,6 +95,32 @@ function describeError(error: unknown): string {
   }
   if (error instanceof LlmBudgetExceededError) {
     return "FirstUser's exploration budget was used up before it could finish."
+  }
+  if (error instanceof SolariError) {
+    if (error.status === 401 || error.status === 403) {
+      return "FirstUser's browser service rejected its credentials. The site owner needs to check the Solari API key."
+    }
+    if (
+      error.status === 402 ||
+      error.status === 429 ||
+      error.code === "ConcurrencyLimitExceeded" ||
+      error.code === "PlanLimitExceeded"
+    ) {
+      return "FirstUser's browser service is at capacity right now. Please try again in a few minutes."
+    }
+    return "FirstUser's cloud browser could not be started. Please try again in a moment."
+  }
+  if (error instanceof OpenAI.APIError) {
+    if (error.status === 401 || error.status === 403) {
+      return "FirstUser's AI provider rejected its credentials. The site owner needs to check the AI API key."
+    }
+    if (error.status === 402 || error.status === 429) {
+      return "FirstUser's AI provider is rate-limiting requests or out of credits. Please try again later."
+    }
+    if (error.status === 404) {
+      return "FirstUser's AI model setting is not valid. The site owner needs to check AI_MODEL."
+    }
+    return "FirstUser's AI provider returned an error. Please try again in a moment."
   }
   return "FirstUser ran into an unexpected problem during this session."
 }

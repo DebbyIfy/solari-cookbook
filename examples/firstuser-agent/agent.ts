@@ -59,8 +59,14 @@ function createLlmClient(): OpenAI {
     )
   }
 
+  if (!process.env.OPENAI_API_KEY) {
+    throw new Error(
+      "AI_PROVIDER is set to openai but OPENAI_API_KEY is missing."
+    )
+  }
+
   return new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY!,
+    apiKey: process.env.OPENAI_API_KEY,
   })
 }
 

@@ -26,32 +26,65 @@
   @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
   @keyframes tickIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
   @keyframes markerPing { 0% { box-shadow: 0 0 0 0 rgba(199,243,107,0.5); } 100% { box-shadow: 0 0 0 8px rgba(199,243,107,0); } }
+
+  /* Layout is authored as inline styles, so these overrides need !important. */
+  .fu-url { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  @media (max-width: 760px) {
+    .fu-header { height: auto !important; grid-template-columns: 1fr auto !important; row-gap: 10px; padding: 12px 16px !important; }
+    .fu-steps { grid-column: 1 / -1; grid-row: 2; justify-self: start !important; }
+
+    .fu-create { padding: 28px 16px 56px !important; }
+    .fu-create-inner { flex-direction: column !important; gap: 36px !important; }
+    .fu-create-intro { width: 100% !important; position: static !important; }
+    .fu-create-title { font-size: 32px !important; }
+    .fu-question-grid { grid-template-columns: 1fr !important; }
+    .fu-start-row { flex-direction: column; align-items: stretch !important; text-align: center; }
+
+    .fu-live { padding: 20px 16px 40px !important; overflow: visible !important; }
+    .fu-live-head { flex-direction: column; align-items: flex-start !important; gap: 4px; }
+    .fu-live-error { flex-direction: column; align-items: stretch !important; gap: 12px !important; }
+    .fu-live-body { flex-direction: column !important; align-items: stretch !important; gap: 16px !important; }
+    .fu-live-panel { width: auto !important; max-height: none !important; padding: 20px !important; }
+    .fu-demo-page { padding: 20px 16px !important; min-height: 280px !important; }
+    .fu-demo-nav > div:last-child { gap: 10px !important; font-size: 11px !important; }
+    .fu-shot { min-height: 220px !important; }
+
+    .fu-report { padding: 24px 16px 64px !important; }
+    .fu-report-meta { flex-direction: column; gap: 6px; }
+    .fu-report-meta > div { flex-wrap: wrap; gap: 6px 16px !important; }
+    .fu-report-card { padding: 28px 20px !important; border-radius: 18px !important; }
+    .fu-report-cols { grid-template-columns: 1fr !important; gap: 28px !important; }
+    .fu-report-rec { padding: 20px !important; }
+
+    .fu-lightbox { padding: 16px !important; }
+  }
 </style>
 </helmet>
 
 <div style="min-height:100vh;display:flex;flex-direction:column;background:#111318;color:#EDEBE3;font-family:'Inter',sans-serif;">
 
-  <div style="height:64px;flex-shrink:0;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:0 32px;border-bottom:1px solid #23262F;">
+  <div class="fu-header" style="height:64px;flex-shrink:0;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:0 32px;border-bottom:1px solid #23262F;">
     <div style="font-family:'Instrument Serif',serif;font-size:21px;letter-spacing:-0.01em;justify-self:start;"><span style="color:#C7F36B;">First</span><span style="color:#EDEBE3;">User</span></div>
-    <div style="display:flex;align-items:center;gap:10px;font-size:13px;justify-self:center;">
+    <div class="fu-steps" style="display:flex;align-items:center;gap:10px;font-size:13px;justify-self:center;">
       <span style="{{ stepLabelStyle.create }}" onClick="{{ goCreate }}">Create</span>
       <span style="color:#3A3D46;">—</span>
       <span style="{{ stepLabelStyle.live }}" onClick="{{ goLive }}">Explore</span>
       <span style="color:#3A3D46;">—</span>
       <span style="{{ stepLabelStyle.report }}" onClick="{{ goReport }}">Report</span>
     </div>
-    <div style="{{ sessionBadgeStyle }}">
+    <div class="fu-badge" style="{{ sessionBadgeStyle }}">
       <div style="{{ sessionBadgeDotStyle }}"></div>
       <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:0.05em;">{{ sessionBadgeText }}</span>
     </div>
   </div>
 
   <sc-if value="{{ isCreate }}" hint-placeholder-val="{{ true }}">
-    <div style="flex:1;display:flex;justify-content:center;padding:56px 40px 80px;animation:fadeUp 0.4s ease both;">
-      <div style="width:100%;max-width:1180px;display:flex;gap:64px;align-items:flex-start;">
+    <div class="fu-create" style="flex:1;display:flex;justify-content:center;padding:56px 40px 80px;animation:fadeUp 0.4s ease both;">
+      <div class="fu-create-inner" style="width:100%;max-width:1180px;display:flex;gap:64px;align-items:flex-start;">
 
-        <div style="width:380px;flex-shrink:0;position:sticky;top:56px;">
-          <div style="font-family:'Instrument Serif',serif;font-size:42px;line-height:1.14;letter-spacing:-0.01em;margin-bottom:16px;">What do you want to learn about your website?</div>
+        <div class="fu-create-intro" style="width:380px;flex-shrink:0;position:sticky;top:56px;">
+          <div class="fu-create-title" style="font-family:'Instrument Serif',serif;font-size:42px;line-height:1.14;letter-spacing:-0.01em;margin-bottom:16px;">What do you want to learn about your website?</div>
           <div style="color:#9A9DA6;font-size:15px;line-height:1.6;margin-bottom:28px;">Give FirstUser a website and a question. It explores the experience like a first-time visitor, gathers evidence, and tells you what it found.</div>
 
           <div style="font-size:11px;font-weight:600;color:#7A7D86;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;">Website</div>
@@ -68,7 +101,7 @@
 
         <div style="flex:1;min-width:0;">
           <div style="font-size:11px;font-weight:600;color:#7A7D86;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:14px;">Choose what to investigate</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;">
+          <div class="fu-question-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;">
             <sc-for list="{{ questions }}" as="q" hint-placeholder-count="7">
               <div onClick="{{ q.onClick }}" style="{{ q.cardStyle }}">
                 <div style="font-size:14.5px;font-weight:600;line-height:1.35;margin-bottom:4px;color:#1B1B18;">{{ q.title }}</div>
@@ -125,7 +158,7 @@
                 <div style="font-family:'Instrument Serif',serif;font-style:italic;font-size:17px;line-height:1.5;color:#1B1B18;">{{ missionPreviewText }}</div>
               </div>
             </sc-if>
-            <div style="display:flex;align-items:center;gap:16px;">
+            <div class="fu-start-row" style="display:flex;align-items:center;gap:16px;">
               <button onClick="{{ startTest }}" disabled="{{ startDisabled }}" style="{{ startButtonStyle }}">{{ startButtonLabel }}</button>
               <span onClick="{{ startDemo }}" style="font-size:13px;color:#7A7D86;cursor:pointer;text-decoration:underline;">Watch a recorded demo instead</span>
             </div>
@@ -137,10 +170,10 @@
   </sc-if>
 
   <sc-if value="{{ isLive }}" hint-placeholder-val="{{ false }}">
-    <div style="flex:1;display:flex;flex-direction:column;align-items:center;padding:32px 24px 40px;animation:fadeUp 0.4s ease both;overflow:hidden;">
+    <div class="fu-live" style="flex:1;display:flex;flex-direction:column;align-items:center;padding:32px 24px 40px;animation:fadeUp 0.4s ease both;overflow:hidden;">
       <div style="width:100%;max-width:1240px;display:flex;flex-direction:column;min-height:0;">
 
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+        <div class="fu-live-head" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
           <div style="display:flex;align-items:center;gap:9px;">
             <div style="{{ statusDotStyle }}"></div>
             <div style="font-size:15px;font-weight:600;">{{ statusText }}</div>
@@ -150,13 +183,13 @@
         <div style="font-size:12.5px;color:#6E7178;margin-bottom:20px;line-height:1.5;">{{ liveSubtitle }}</div>
 
         <sc-if value="{{ hasLiveError }}" hint-placeholder-val="{{ false }}">
-          <div style="margin-bottom:20px;padding:14px 18px;border:1px solid #7A3A3A;background:#2A1414;border-radius:12px;font-size:13.5px;color:#F0B8B8;line-height:1.55;display:flex;justify-content:space-between;align-items:center;gap:16px;">
+          <div class="fu-live-error" style="margin-bottom:20px;padding:14px 18px;border:1px solid #7A3A3A;background:#2A1414;border-radius:12px;font-size:13.5px;color:#F0B8B8;line-height:1.55;display:flex;justify-content:space-between;align-items:center;gap:16px;">
             <span>{{ liveErrorText }}</span>
             <button onClick="{{ goCreate }}" style="flex-shrink:0;padding:9px 16px;font-size:13px;font-weight:600;border:1px solid #9A5555;border-radius:8px;background:transparent;color:#F0B8B8;cursor:pointer;">Back to Create</button>
           </div>
         </sc-if>
 
-        <div style="display:flex;gap:24px;align-items:flex-start;">
+        <div class="fu-live-body" style="display:flex;gap:24px;align-items:flex-start;">
         <div style="flex:1.5;min-width:0;border-radius:20px;overflow:hidden;border:1px solid #23262F;box-shadow:0 24px 60px rgba(0,0,0,0.4);">
           <div style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:#1A1D24;border-bottom:1px solid #23262F;">
             <div style="display:flex;gap:6px;">
@@ -164,15 +197,15 @@
               <div style="width:9px;height:9px;border-radius:50%;background:#33363F;"></div>
               <div style="width:9px;height:9px;border-radius:50%;background:#33363F;"></div>
             </div>
-            <div style="flex:1;background:#111318;border:1px solid #2E313B;border-radius:7px;padding:7px 12px;font-size:12px;color:#B7B9C0;font-family:'IBM Plex Mono',monospace;transition:all 0.3s ease;">{{ currentUrl }}</div>
+            <div class="fu-url" style="flex:1;background:#111318;border:1px solid #2E313B;border-radius:7px;padding:7px 12px;font-size:12px;color:#B7B9C0;font-family:'IBM Plex Mono',monospace;transition:all 0.3s ease;">{{ currentUrl }}</div>
             <div style="{{ browserChipStyle }}">{{ browserChipText }}</div>
           </div>
 
           <sc-if value="{{ isDemoMode }}" hint-placeholder-val="{{ true }}">
-          <div style="position:relative;background:#F4F1EA;padding:32px 36px;min-height:360px;">
+          <div class="fu-demo-page" style="position:relative;background:#F4F1EA;padding:32px 36px;min-height:360px;">
             <div style="{{ markerDotStyle }}"></div>
             <div style="{{ markerRingStyle }}"></div>
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;">
+            <div class="fu-demo-nav" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;">
               <div style="font-family:'Instrument Serif',serif;font-size:19px;color:#1B1B18;">Reclaim</div>
               <div style="display:flex;gap:20px;font-size:12.5px;color:#6E7178;">
                 <span>Pricing</span><span>FAQ</span><span>How it works</span>
@@ -209,7 +242,7 @@
           </sc-if>
 
           <sc-if value="{{ isLiveMode }}" hint-placeholder-val="{{ false }}">
-          <div style="position:relative;background:#000;min-height:360px;display:flex;align-items:center;justify-content:center;">
+          <div class="fu-shot" style="position:relative;background:#000;min-height:360px;display:flex;align-items:center;justify-content:center;">
             <sc-if value="{{ hasLiveScreenshot }}" hint-placeholder-val="{{ false }}">
               <img src="{{ latestScreenshotUrl }}" style="width:100%;display:block;" />
             </sc-if>
@@ -220,7 +253,7 @@
           </sc-if>
         </div>
 
-        <div style="width:360px;flex-shrink:0;background:#1A1D24;border:1px solid #23262F;border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:20px;max-height:min(600px,calc(100vh - 220px));overflow:auto;">
+        <div class="fu-live-panel" style="width:360px;flex-shrink:0;background:#1A1D24;border:1px solid #23262F;border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:20px;max-height:min(600px,calc(100vh - 220px));overflow:auto;">
           <div style="display:flex;gap:18px;">
             <div>
               <div style="font-size:22px;font-weight:400;font-family:'Instrument Serif',serif;">{{ observationCount }}</div>
@@ -289,9 +322,9 @@
   </sc-if>
 
   <sc-if value="{{ isReport }}" hint-placeholder-val="{{ false }}">
-    <div style="flex:1;display:flex;justify-content:center;padding:48px 24px 100px;animation:fadeUp 0.4s ease both;">
+    <div class="fu-report" style="flex:1;display:flex;justify-content:center;padding:48px 24px 100px;animation:fadeUp 0.4s ease both;">
       <div style="width:100%;max-width:840px;">
-        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:24px;font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:#6E7178;">
+        <div class="fu-report-meta" style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:24px;font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:#6E7178;">
           <span>{{ reportSourceLabel }}</span>
           <div style="display:flex;align-items:baseline;gap:22px;">
             <span>persona: {{ submittedPersona }}</span>
@@ -301,7 +334,7 @@
           </div>
         </div>
 
-        <div style="background:#F4F1EA;color:#1B1B18;border-radius:24px;padding:56px 60px;box-shadow:0 30px 70px rgba(0,0,0,0.35);">
+        <div class="fu-report-card" style="background:#F4F1EA;color:#1B1B18;border-radius:24px;padding:56px 60px;box-shadow:0 30px 70px rgba(0,0,0,0.35);">
 
           <div style="font-family:'Instrument Serif',serif;font-style:italic;font-size:17px;color:#77746A;line-height:1.55;margin-bottom:36px;">{{ missionPreviewText }}</div>
 
@@ -320,7 +353,7 @@
 
           <div style="height:1px;background:#DCD8CC;margin-bottom:40px;"></div>
 
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:36px;margin-bottom:44px;">
+          <div class="fu-report-cols" style="display:grid;grid-template-columns:1fr 1fr;gap:36px;margin-bottom:44px;">
             <div>
               <div style="font-size:13px;font-weight:700;margin-bottom:16px;">What helped</div>
               <div style="display:flex;flex-direction:column;gap:16px;">
@@ -346,7 +379,7 @@
           </div>
 
           <sc-if value="{{ hasRecommendation }}" hint-placeholder-val="{{ true }}">
-          <div style="position:relative;background:#EAE7DF;border-radius:16px;padding:28px 32px 26px;margin-bottom:56px;">
+          <div class="fu-report-rec" style="position:relative;background:#EAE7DF;border-radius:16px;padding:28px 32px 26px;margin-bottom:56px;">
             <div style="font-size:11px;font-weight:600;color:#8C897E;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;">Recommendation</div>
             <div style="font-family:'Instrument Serif',serif;font-size:20px;line-height:1.5;">{{ recommendationText }}</div>
           </div>
@@ -405,7 +438,7 @@
   </sc-if>
 
   <sc-if value="{{ hasLightbox }}" hint-placeholder-val="{{ false }}">
-    <div onClick="{{ closeLightbox }}" style="position:fixed;inset:0;background:rgba(10,11,14,0.86);display:flex;align-items:center;justify-content:center;padding:48px;z-index:100;cursor:zoom-out;animation:fadeUp 0.2s ease both;">
+    <div onClick="{{ closeLightbox }}" class="fu-lightbox" style="position:fixed;inset:0;background:rgba(10,11,14,0.86);display:flex;align-items:center;justify-content:center;padding:48px;z-index:100;cursor:zoom-out;animation:fadeUp 0.2s ease both;">
       <div style="position:absolute;top:24px;right:28px;font-size:13px;font-weight:600;color:#9A9DA6;">Close ✕</div>
       <img src="{{ lightboxUrl }}" onClick="{{ stopLightboxClose }}" style="max-width:100%;max-height:100%;border-radius:12px;box-shadow:0 30px 80px rgba(0,0,0,0.5);display:block;cursor:default;" />
     </div>
@@ -952,7 +985,11 @@ class Component extends DCLogic {
     const latestScreenshotUrl = hasLiveScreenshot ? liveScreenshots[liveScreenshots.length - 1] : '';
 
     const liveSubtitle = isLiveMode
-      ? 'LIVE — FirstUser is actively browsing this website in a real cloud browser.'
+      ? (hasLiveError
+        ? 'This live session stopped before FirstUser could finish.'
+        : liveDone
+          ? 'LIVE — FirstUser explored this website in a real cloud browser.'
+          : 'LIVE — FirstUser is actively browsing this website in a real cloud browser.')
       : `Recorded demo using representative content for reclaim.buildneststudio.com — not a live analysis of ${websiteHost}.`;
 
     const browserChipText = isLiveMode ? 'LIVE' : 'DEMO';

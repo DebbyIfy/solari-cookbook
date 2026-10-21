@@ -7,3 +7,8 @@ __pycache__/
 .venv/
 venv/
 screenshot.png
+
+# Local run output / OS files
+.DS_Store
+/firstuser-result.json
+/screenshots/

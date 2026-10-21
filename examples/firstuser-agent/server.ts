@@ -146,9 +146,16 @@ function startTest(
 
   sessions.set(id, session)
 
+  // Server-side logs (visible in the hosting provider's log stream) carry the
+  // real cause; the session only ever exposes the calm describeError() text.
+  const logPrefix = `[test ${id.slice(0, 8)}]`
+
   runFirstUserTest(
     { websiteUrl, persona, goal, researchRules },
     {
+      onLog: (message) => {
+        console.log(`${logPrefix} ${message}`)
+      },
       onSessionStarted: () => {
         session.status = "exploring"
         session.currentUrl = websiteUrl
@@ -196,6 +203,8 @@ function startTest(
         pushLog(session, "Investigation complete")
       },
       onError: (error) => {
+        console.error(`${logPrefix} Investigation failed:`, error)
+        if (error.cause) console.error(`${logPrefix} Caused by:`, error.cause)
         session.status = "error"
         session.error = describeError(error)
         session.currentActivity = "Investigation failed"

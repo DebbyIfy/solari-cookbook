@@ -160,6 +160,24 @@ SOLARI_API_KEY=your_solari_api_key
 OPENAI_API_KEY=your_openai_api_key
 ```
 
+### LLM provider: OpenAI or OpenRouter
+
+FirstUser's reasoning calls go through the OpenAI SDK, which can point at either OpenAI or [OpenRouter](https://openrouter.ai) (an OpenAI-compatible API). Select the provider with `AI_PROVIDER`:
+
+```bash
+# OpenAI (default if AI_PROVIDER is unset)
+AI_PROVIDER=openai
+OPENAI_API_KEY=your_openai_api_key
+AI_MODEL=gpt-5
+
+# OpenRouter
+AI_PROVIDER=openrouter
+OPENROUTER_API_KEY=your_openrouter_api_key
+AI_MODEL=openai/gpt-5   # provider/model format, chosen explicitly — never auto-selected
+```
+
+If `AI_PROVIDER=openrouter` and `OPENROUTER_API_KEY` is missing (or vice versa for `openai`), FirstUser fails fast with a clear configuration error instead of silently falling back to the other provider.
+
 Run the agent as a one-off CLI script (uses the built-in Reclaim demo config):
 
 ```bash

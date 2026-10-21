@@ -25,9 +25,46 @@ const solari = new Solari({
   apiKey: process.env.SOLARI_API_KEY!,
 })
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY!,
-})
+/**
+ * FirstUser's LLM provider. OpenRouter exposes an OpenAI-compatible
+ * `/responses` endpoint (same request/response schema), so the existing
+ * `openai.responses.create()` call sites below work unchanged for either
+ * provider — only client construction and the model string differ.
+ */
+const AI_PROVIDER = (process.env.AI_PROVIDER ?? "openai").trim().toLowerCase()
+
+export const AI_MODEL = process.env.AI_MODEL?.trim() || "gpt-5"
+
+function createLlmClient(): OpenAI {
+  if (AI_PROVIDER === "openrouter") {
+    if (!process.env.OPENROUTER_API_KEY) {
+      throw new Error(
+        "AI_PROVIDER is set to openrouter but OPENROUTER_API_KEY is missing."
+      )
+    }
+
+    return new OpenAI({
+      apiKey: process.env.OPENROUTER_API_KEY,
+      baseURL: "https://openrouter.ai/api/v1",
+      defaultHeaders: {
+        "HTTP-Referer": "https://firstuser.buildneststudio.com",
+        "X-Title": "FirstUser",
+      },
+    })
+  }
+
+  if (AI_PROVIDER !== "openai") {
+    throw new Error(
+      `AI_PROVIDER "${AI_PROVIDER}" is not supported. Use "openai" or "openrouter".`
+    )
+  }
+
+  return new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY!,
+  })
+}
+
+const openai = createLlmClient()
 
 export const MAX_STEPS = 6
 
@@ -482,7 +519,7 @@ at all to reason from.`
     log("--- FINAL EVALUATION ---")
 
     const evaluation = await callOpenAI("final evaluation", {
-      model: "gpt-5",
+      model: AI_MODEL,
 
       input: `
 You are the final reasoning layer of FirstUser.
@@ -984,7 +1021,7 @@ Return ONLY valid JSON:
       log(`--- STEP ${step}: EXPLORATION REASONING + EVIDENCE ---`)
 
       const response = await callOpenAI("exploration reasoning + evidence", {
-        model: "gpt-5",
+        model: AI_MODEL,
 
         input: `
 You are FirstUser, an AI agent behaving like a thoughtful first-time user exploring a website.
